@@ -47,7 +47,8 @@
         "npx vitest run app/lib/pricing.test.ts -> 18/18 passing (2026-06-26). RUN v4.1.9 | Test Files 1 passed (1) | Tests 18 passed (18).",
         "npm run typecheck (tsc --noEmit) -> 0 errors.",
         "RED phase confirmed: before pricing.ts existed, test runner output 'Cannot find module ./pricing' (exit 1).",
-        "Post-review hardening: parseMoney now treats empty/blank string as null (Shopify can emit \"\" for missing money; Number(\"\")===0 footgun) + 3 added tests. formatMoney EPSILON rounding documented as approximate. Reviewer verdict: spec compliant, quality approved."
+        "Post-review hardening: parseMoney now treats empty/blank string as null (Shopify can emit \"\" for missing money; Number(\"\")===0 footgun) + 3 added tests. formatMoney EPSILON rounding documented as approximate. Reviewer verdict: spec compliant, quality approved.",
+        "Fixed ESLint crash that appeared once test files existed: @remix-run/eslint-config/jest-testing-library pulls eslint-plugin-jest, which crashed detecting a Jest version on *.test.ts (we use Vitest). Pinned jest version in .eslintrc.cjs settings. Final bash init.sh -> HARNESS GREEN (lint clean, 18/18 tests, build ok)."
       ],
       "notes": "app/lib/pricing.ts has zero Shopify/Remix/Polaris imports (pure, unit-tested)."
     },
