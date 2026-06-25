@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code cho Developer — Slides</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ───── Dark theme (default) ───── */
+  :root,
+  [data-theme="dark"] {
+    --bg: #0a0f0d;
+    --bg-2: #0d1411;
+    --green: #4ade80;
+    --green-bright: #6ee7a0;
+    --green-glow: rgba(74, 222, 128, 0.15);
+    --orange: #f5a623;
+    --blue: #6cb3ff;
+    --text: #e8efe9;
+    --text-strong: #ffffff;
+    --muted: #6b7a70;
+    --grid-line: rgba(74, 222, 128, 0.03);
+    --progress-track: rgba(255, 255, 255, 0.05);
+    --box-bg-start: rgba(74, 222, 128, 0.06);
+    --box-bg-end: rgba(74, 222, 128, 0.02);
+    --highlight-bg: rgba(74, 222, 128, 0.12);
+    --highlight-border: rgba(74, 222, 128, 0.3);
+    --info-bg: rgba(108, 179, 255, 0.06);
+    --code-bg: rgba(0, 0, 0, 0.35);
+  }
+
+  /* ───── Light theme ───── */
+  [data-theme="light"] {
+    --bg: #f5f7f4;
+    --bg-2: #ffffff;
+    --green: #16a34a;
+    --green-bright: #15803d;
+    --green-glow: rgba(22, 163, 74, 0.18);
+    --orange: #b8740a;
+    --blue: #2563eb;
+    --text: #1f2421;
+    --text-strong: #0a0f0d;
+    --muted: #6b7a70;
+    --grid-line: rgba(22, 163, 74, 0.05);
+    --progress-track: rgba(0, 0, 0, 0.08);
+    --box-bg-start: rgba(22, 163, 74, 0.08);
+    --box-bg-end: rgba(22, 163, 74, 0.02);
+    --highlight-bg: rgba(22, 163, 74, 0.12);
+    --highlight-border: rgba(22, 163, 74, 0.35);
+    --info-bg: rgba(37, 99, 235, 0.06);
+    --code-bg: rgba(0, 0, 0, 0.06);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "JetBrains Mono", "Fira Code", "Courier New", monospace;
+    font-feature-settings: "calt" 1, "liga" 1, "ss01" 1;
+    overflow: hidden;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  .slide {
+    width: 100vw;
+    height: 100vh;
+    padding: 4.5vh 7vw;
+    display: none;
+    flex-direction: column;
+    gap: 2vh;
+    position: relative;
+    background:
+      radial-gradient(ellipse at top left, var(--green-glow), transparent 60%),
+      var(--bg);
+    transition: background 0.3s ease;
+    overflow: hidden;
+  }
+  .slide.active { display: flex; }
+
+  /* Subtle grid background */
+  .slide::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  .eyebrow {
+    color: var(--green);
+    font-size: 1.0rem;
+    letter-spacing: 0.12em;
+    font-weight: 500;
+    text-transform: uppercase;
+    z-index: 1;
+  }
+
+  .title {
+    font-family: "Space Grotesk", "Inter", sans-serif;
+    font-size: 3.3rem;
+    font-weight: 700;
+    color: var(--text-strong);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    z-index: 1;
+  }
+  .title.big { font-size: 4.5rem; }
+  .title.sm  { font-size: 2.6rem; }
+
+  .title .accent {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--green);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+  }
+
+  /* Main content box (green-bordered) */
+  .content-box {
+    background: linear-gradient(180deg, var(--box-bg-start), var(--box-bg-end));
+    border-left: 3px solid var(--green);
+    padding: 2.4vh 2.4vw;
+    border-radius: 4px;
+    box-shadow: 0 0 40px var(--green-glow);
+    z-index: 1;
+  }
+
+  .content-box .lead {
+    font-size: 1.25rem;
+    color: var(--text);
+    margin-bottom: 1.8vh;
+  }
+
+  .section-label {
+    color: var(--orange);
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 1.2vh;
+  }
+
+  .bullet-list { list-style: none; margin-bottom: 1.5vh; }
+  .bullet-list:last-child { margin-bottom: 0; }
+
+  .bullet-list li {
+    font-size: 1.1rem;
+    padding: 0.5vh 0 0.5vh 1.8rem;
+    position: relative;
+    color: var(--text);
+    line-height: 1.45;
+  }
+
+  .bullet-list li::before {
+    content: "▸";
+    color: var(--green);
+    position: absolute;
+    left: 0.4rem;
+    font-size: 1.0rem;
+    top: 0.65vh;
+  }
+  .bullet-list li strong { color: var(--text-strong); }
+  .bullet-list li code, .lead code, p code, td code, .info-box code {
+    background: var(--code-bg);
+    color: var(--green-bright);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 0.92em;
+  }
+
+  .highlight-box {
+    background: var(--highlight-bg);
+    border: 1px solid var(--highlight-border);
+    padding: 1.4vh 1.4vw;
+    border-radius: 4px;
+    color: var(--green-bright);
+    font-size: 1.1rem;
+    display: inline-block;
+  }
+
+  /* Info callout */
+  .info-box {
+    background: var(--info-bg);
+    border-left: 3px solid var(--blue);
+    padding: 1.8vh 1.8vw;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    line-height: 1.55;
+    color: var(--text);
+    z-index: 1;
+  }
+  .info-box .info-label { color: var(--blue); font-weight: 600; }
+  .info-box strong { color: var(--text-strong); }
+
+  /* ───── Utility additions (match aesthetic) ───── */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5vw;
+    z-index: 1;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2vw;
+    z-index: 1;
+  }
+
+  .card {
+    background: linear-gradient(180deg, var(--box-bg-start), var(--box-bg-end));
+    border: 1px solid var(--highlight-border);
+    border-top: 3px solid var(--green);
+    padding: 2vh 1.4vw;
+    border-radius: 4px;
+  }
+  .card h3 {
+    font-family: "Space Grotesk", sans-serif;
+    color: var(--text-strong);
+    font-size: 1.2rem;
+    margin-bottom: 1vh;
+  }
+  .card .tag {
+    color: var(--green);
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* Code block */
+  pre.code {
+    background: var(--code-bg);
+    border: 1px solid var(--highlight-border);
+    border-left: 3px solid var(--green);
+    border-radius: 4px;
+    padding: 1.6vh 1.4vw;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    overflow: auto;
+    z-index: 1;
+    color: var(--text);
+    white-space: pre;
+  }
+  pre.code .c { color: var(--muted); }            /* comment */
+  pre.code .k { color: var(--orange); }            /* key / keyword */
+  pre.code .g { color: var(--green-bright); }      /* value / accent */
+  pre.code .b { color: var(--blue); }              /* secondary */
+
+  /* Table */
+  table.t {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1.0rem;
+    z-index: 1;
+  }
+  table.t th, table.t td {
+    text-align: left;
+    padding: 1vh 1vw;
+    border-bottom: 1px solid var(--highlight-border);
+    vertical-align: top;
+    line-height: 1.4;
+  }
+  table.t th {
+    color: var(--green);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.85rem;
+    border-bottom: 2px solid var(--green);
+  }
+  table.t td strong { color: var(--text-strong); }
+  table.t tr:last-child td { border-bottom: none; }
+
+  .pillar-when { color: var(--orange); font-weight: 600; }
+  .yes { color: var(--green-bright); }
+  .no  { color: var(--orange); }
+
+  /* Footer */
+  .footer {
+    position: absolute;
+    bottom: 1.4vh;
+    left: 0; right: 0;
+    padding: 0 2vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+    color: var(--muted);
+    z-index: 1;
+  }
+  .footer .key {
+    display: inline-block;
+    border: 1px solid var(--muted);
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-right: 6px;
+  }
+  .footer .progress {
+    flex: 1;
+    height: 2px;
+    background: var(--progress-track);
+    margin: 0 2vw;
+    position: relative;
+  }
+  .footer .progress::after {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: var(--progress, 0%);
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    transition: width 0.25s ease;
+  }
+
+  /* Cover */
+  .cover { justify-content: center; align-items: flex-start; gap: 2.5vh; }
+  .cover .meta { display: flex; gap: 1vw; flex-wrap: wrap; z-index: 1; }
+  .cover .meta span {
+    border: 1px solid var(--highlight-border);
+    background: var(--box-bg-start);
+    padding: 0.7vh 1.1vw;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+
+  .center-wrap { justify-content: center; align-items: center; text-align: center; }
+  .center-wrap .content-box { max-width: 60vw; }
+
+  /* ───── Theme toggle ───── */
+  .theme-toggle {
+    position: fixed;
+    top: 2vh; right: 2vw;
+    z-index: 30;
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px;
+    background: var(--box-bg-start);
+    border: 1px solid var(--highlight-border);
+    border-radius: 999px;
+    color: var(--text);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.85rem; font-weight: 500; letter-spacing: 0.05em;
+    cursor: pointer; transition: all 0.2s ease; backdrop-filter: blur(8px);
+  }
+  .theme-toggle:hover { background: var(--highlight-bg); box-shadow: 0 0 20px var(--green-glow); transform: translateY(-1px); }
+  .theme-toggle svg { width: 16px; height: 16px; stroke: var(--green); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  [data-theme="dark"] .theme-toggle .icon-sun  { display: block; }
+  [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+  [data-theme="light"] .theme-toggle .icon-sun  { display: none; }
+  [data-theme="light"] .theme-toggle .icon-moon { display: block; }
+
+  /* Nav arrows */
+  .nav-btn {
+    position: fixed; bottom: 2vh; z-index: 30;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--box-bg-start); border: 1px solid var(--highlight-border);
+    color: var(--green); cursor: pointer; font-size: 1.2rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s ease; backdrop-filter: blur(8px);
+  }
+  .nav-btn:hover { background: var(--highlight-bg); box-shadow: 0 0 16px var(--green-glow); }
+  #prevBtn { right: 6vw; }
+  #nextBtn { right: 2vw; }
+
+  /* ESC overview menu */
+  .overview {
+    position: fixed; inset: 0; z-index: 40;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(6px);
+    display: none;
+    padding: 6vh 6vw;
+    overflow: auto;
+  }
+  .overview.open { display: block; }
+  .overview h2 {
+    font-family: "Space Grotesk", sans-serif;
+    color: var(--green); font-size: 1.6rem; margin-bottom: 3vh;
+    letter-spacing: 0.04em;
+  }
+  .overview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2vw; }
+  .ov-item {
+    border: 1px solid var(--highlight-border);
+    background: var(--box-bg-start);
+    border-radius: 4px; padding: 1.4vh 1vw;
+    cursor: pointer; color: var(--text);
+    font-size: 0.92rem; line-height: 1.4;
+    transition: all 0.15s ease;
+  }
+  .ov-item:hover { background: var(--highlight-bg); border-color: var(--green); }
+  .ov-item .n { color: var(--green); font-weight: 700; margin-right: 6px; }
+</style>
+</head>
+<body>
+
+<!-- Theme toggle -->
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+  <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+  <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  <span class="label">THEME</span>
+</button>
+
+<button class="nav-btn" id="prevBtn" aria-label="Previous">‹</button>
+<button class="nav-btn" id="nextBtn" aria-label="Next">›</button>
+
+<!-- ░░░░░░░░░░░░░░░░░░░ SLIDES ░░░░░░░░░░░░░░░░░░░ -->
+<div id="deck">
+
+  <!-- 1 — COVER -->
+  <section class="slide cover" data-title="Bìa">
+    <div class="eyebrow">// WORKSHOP · 2.5 GIỜ</div>
+    <h1 class="title big">Claude Code <span class="accent">cho Developer</span></h1>
+    <div class="content-box" style="max-width:64vw">
+      <p class="lead">Mở rộng &amp; "huấn luyện" Claude Code cho dự án của bạn:
+      <strong style="color:var(--text-strong)">CLAUDE.md · Skills · Sub-agents</strong></p>
+      <div class="highlight-box">Skills mạnh không nằm ở model — mà ở cách bạn cấu hình ngữ cảnh.</div>
+    </div>
+    <div class="meta">
+      <span>👥 Đối tượng: Developer</span>
+      <span>⏱ 150 phút</span>
+      <span>🎯 Lý thuyết + Demo + Thực hành</span>
+      <span>📅 Tài liệu chính thức 2026</span>
+    </div>
+  </section>
+
+  <!-- 2 — MỤC TIÊU -->
+  <section class="slide" data-title="Mục tiêu buổi học">
+    <div class="eyebrow">// MỤC TIÊU</div>
+    <h1 class="title">Sau buổi học, bạn có thể <span class="accent">làm được gì</span></h1>
+    <div class="content-box">
+      <ul class="bullet-list">
+        <li><strong>Hiểu</strong> Claude Code và 3 cơ chế "dạy" nó làm việc theo cách của bạn</li>
+        <li><strong>Viết</strong> một <code>CLAUDE.md</code> tốt và nắm hệ thống phân cấp bộ nhớ</li>
+        <li><strong>Tạo</strong> Skills đóng gói quy trình/kiến thức — hiểu <em>progressive disclosure</em></li>
+        <li><strong>Tạo</strong> Sub-agent để cô lập ngữ cảnh và chuyên môn hóa công việc</li>
+        <li><strong>Phân biệt</strong> khi nào dùng CLAUDE.md vs Skills vs Sub-agents vs Slash command</li>
+      </ul>
+    </div>
+    <div class="info-box">
+      <span class="info-label">Thông điệp xuyên suốt:</span> Ba công cụ hôm nay khác nhau ở <strong>thời điểm nạp</strong> và <strong>phạm vi ngữ cảnh</strong>.
+    </div>
+  </section>
+
+  <!-- 3 — TIMELINE -->
+  <section class="slide" data-title="Phân bổ thời gian">
+    <div class="eyebrow">// TIMELINE · 150 PHÚT</div>
+    <h1 class="title">Lộ trình <span class="accent">buổi học</span></h1>
+    <div class="content-box">
+      <table class="t">
+        <tr><th>Thời gian</th><th>Nội dung</th><th>Phút</th></tr>
+        <tr><td>0:00 – 0:10</td><td>Mở đầu: Claude Code &amp; 3 cơ chế mở rộng</td><td>10</td></tr>
+        <tr><td>0:10 – 0:35</td><td>Phần 1: <strong>CLAUDE.md</strong></td><td>25</td></tr>
+        <tr><td>0:35 – 1:35</td><td>Phần 2: <strong>Skills</strong> <span class="pillar-when">(trọng tâm)</span></td><td>60</td></tr>
+        <tr><td>1:35 – 1:45</td><td>☕ Nghỉ giải lao</td><td>10</td></tr>
+        <tr><td>1:45 – 2:15</td><td>Phần 3: <strong>Sub-agents</strong></td><td>30</td></tr>
+        <tr><td>2:15 – 2:30</td><td>Tổng kết · So sánh · Q&amp;A</td><td>15</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 4 — CLAUDE CODE LÀ GÌ -->
+  <section class="slide" data-title="Claude Code là gì">
+    <div class="eyebrow">// MỞ ĐẦU</div>
+    <h1 class="title">Claude Code là <span class="accent">một agent</span></h1>
+    <div class="grid-2">
+      <div class="content-box">
+        <div class="section-label">Chạy ở nhiều môi trường</div>
+        <ul class="bullet-list">
+          <li>CLI trong terminal</li>
+          <li>Desktop app (Mac/Windows)</li>
+          <li>Web — claude.ai/code</li>
+          <li>IDE extension (VS Code, JetBrains)</li>
+          <li>Agent SDK (Python / TypeScript)</li>
+        </ul>
+      </div>
+      <div class="content-box">
+        <div class="section-label">Là một agent: nó có thể…</div>
+        <ul class="bullet-list">
+          <li>Đọc / sửa file</li>
+          <li>Chạy lệnh shell</li>
+          <li>Tìm kiếm trong codebase</li>
+          <li>Gọi công cụ — nhiều bước, tự động</li>
+        </ul>
+      </div>
+    </div>
+    <div class="info-box">
+      <span class="info-label">Quan trọng:</span> Ngữ cảnh (context window) là <strong>tài nguyên có hạn</strong>. Nhồi mọi thứ vào → tốn token + giảm độ tuân thủ.
+    </div>
+  </section>
+
+  <!-- 5 — 3 CƠ CHẾ -->
+  <section class="slide" data-title="3 cơ chế mở rộng">
+    <div class="eyebrow">// KHUNG XƯƠNG CỦA BUỔI HỌC</div>
+    <h1 class="title">3 cơ chế — khác ở <span class="accent">thời điểm nạp</span></h1>
+    <div class="content-box">
+      <table class="t">
+        <tr><th>Cơ chế</th><th>Nạp khi nào</th><th>Phạm vi ngữ cảnh</th><th>Dùng cho</th></tr>
+        <tr><td><strong>CLAUDE.md</strong></td><td class="pillar-when">Luôn luôn</td><td>Ngữ cảnh chính</td><td>Quy ước, lệnh build, "luật" dự án</td></tr>
+        <tr><td><strong>Skills</strong></td><td class="pillar-when">Theo nhu cầu</td><td>Nạp dần (progressive)</td><td>Quy trình tái dùng, kiến thức</td></tr>
+        <tr><td><strong>Sub-agents</strong></td><td class="pillar-when">Khi được giao việc</td><td>Cửa sổ riêng biệt</td><td>Cô lập việc nặng (research, review)</td></tr>
+      </table>
+    </div>
+    <pre class="code"><span class="c">              Token dùng theo thời gian</span>
+CLAUDE.md   <span class="g">████████████████████████████</span>  <span class="c">(luôn bật, không tắt được)</span>
+Skill       <span class="c">........</span><span class="g">[████]</span><span class="c">........</span><span class="g">[████]</span><span class="c">..  (chỉ bật khi cần)</span>
+Sub-agent   <span class="c">--------</span><span class="b">[ context riêng ]</span><span class="c">----  (việc nặng ở "phòng" khác)</span>
+                         <span class="b">↓ chỉ trả về tóm tắt ngắn</span></pre>
+  </section>
+
+  <!-- 6 — SECTION: CLAUDE.MD -->
+  <section class="slide center-wrap" data-title="▶ Phần 1: CLAUDE.md">
+    <div class="content-box">
+      <div class="eyebrow" style="text-align:center">// PHẦN 1 · 25 PHÚT</div>
+      <h1 class="title big" style="text-align:center"><span class="accent">CLAUDE.md</span></h1>
+      <p class="lead" style="text-align:center;margin-top:1.5vh;margin-bottom:0">Bộ nhớ dự án — chỉ dẫn cố định Claude đọc ở đầu mỗi session</p>
+    </div>
+  </section>
+
+  <!-- 7 — CLAUDE.MD LÀ GÌ -->
+  <section class="slide" data-title="CLAUDE.md là gì">
+    <div class="eyebrow">// CLAUDE.MD</div>
+    <h1 class="title">File markdown chứa <span class="accent">"luật" của dự án</span></h1>
+    <div class="content-box">
+      <p class="lead">Chính là những gì bạn sẽ phải giải thích lại cho Claude <strong>lặp đi lặp lại</strong> — viết một lần, dùng mọi session.</p>
+      <div class="section-label">Phân biệt với "auto memory"</div>
+      <ul class="bullet-list">
+        <li><strong>CLAUDE.md</strong> — do <em>con người viết</em> để định hướng (luật, quy ước, code style)</li>
+        <li><strong>Auto memory</strong> — do <em>Claude tự ghi</em> dựa trên các lần bạn sửa lỗi / sở thích</li>
+        <li>Cả hai đều nạp ở <strong>đầu session</strong></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 8 — PHÂN CẤP 4 CẤP -->
+  <section class="slide" data-title="CLAUDE.md: phân cấp">
+    <div class="eyebrow">// HỆ THỐNG PHÂN CẤP</div>
+    <h1 class="title sm">4 vị trí — nạp từ <span class="accent">rộng → hẹp</span></h1>
+    <div class="content-box">
+      <table class="t">
+        <tr><th>Phạm vi</th><th>Vị trí</th><th>Chia sẻ với</th></tr>
+        <tr><td><strong>Managed</strong></td><td><code>/etc/claude-code/CLAUDE.md</code> (org)</td><td>Cả tổ chức</td></tr>
+        <tr><td><strong>User</strong></td><td><code>~/.claude/CLAUDE.md</code></td><td>Chỉ bạn (mọi dự án)</td></tr>
+        <tr><td><strong>Project</strong></td><td><code>./CLAUDE.md</code></td><td>Cả team (qua git)</td></tr>
+        <tr><td><strong>Local</strong></td><td><code>./CLAUDE.local.md</code></td><td>Chỉ bạn (gitignore)</td></tr>
+      </table>
+    </div>
+    <div class="info-box">
+      <span class="info-label">Cơ chế:</span> các file được <strong>nối (concatenate)</strong>, KHÔNG ghi đè. File <strong>gần nơi chạy Claude đọc sau cùng</strong> → ưu tiên logic cao hơn. <code>CLAUDE.local.md</code> KHÔNG bị khai tử.
+    </div>
+  </section>
+
+  <!-- 9 — PHÁT HIỆN + @IMPORT -->
+  <section class="slide" data-title="CLAUDE.md: phát hiện & @import">
+    <div class="eyebrow">// PHÁT HIỆN & @IMPORT</div>
+    <h1 class="title sm">Đi ngược cây thư mục + <span class="accent">import module</span></h1>
+    <div class="grid-2">
+      <div class="content-box">
+        <div class="section-label">Cách phát hiện</div>
+        <ul class="bullet-list">
+          <li>Đi <strong>ngược lên</strong> cây thư mục, gom mọi CLAUDE.md tới gốc git</li>
+          <li>File ở <strong>thư mục con</strong> nạp <em>theo nhu cầu</em> (lazy)</li>
+          <li>→ Lý tưởng cho <strong>monorepo</strong>: mỗi team một CLAUDE.md</li>
+        </ul>
+      </div>
+      <div class="content-box">
+        <div class="section-label">Cú pháp @import</div>
+        <pre class="code"><span class="c"># Chỉ dẫn bổ sung</span>
+Xem <span class="g">@README</span> để hiểu dự án.
+git: <span class="g">@docs/git.md</span>
+sec: <span class="g">@../shared/security.md</span></pre>
+        <ul class="bullet-list">
+          <li>Lồng tối đa <strong>4 cấp</strong></li>
+          <li>Nội dung nạp toàn bộ → <strong>không tiết kiệm token</strong>, chỉ gọn</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 — LỆNH + BEST PRACTICES -->
+  <section class="slide" data-title="CLAUDE.md: lệnh & best practices">
+    <div class="eyebrow">// LỆNH & BEST PRACTICES</div>
+    <h1 class="title sm">Giữ <span class="accent">ngắn, cụ thể, có cấu trúc</span></h1>
+    <div class="grid-2">
+      <div class="content-box">
+        <div class="section-label">Lệnh hữu ích</div>
+        <ul class="bullet-list">
+          <li><code>/init</code> — tự sinh CLAUDE.md từ codebase</li>
+          <li><code>/memory</code> — xem/sửa file đang nạp</li>
+          <li><code>#</code> + nội dung — ghi nhanh một memory</li>
+        </ul>
+        <div class="section-label">Quy tắc vàng</div>
+        <ul class="bullet-list">
+          <li><strong>&lt; 200 dòng/file</strong> — dài hơn giảm tuân thủ</li>
+          <li>Dùng heading + bullet</li>
+        </ul>
+      </div>
+      <div class="content-box">
+        <div class="section-label">Cụ thể, kiểm chứng được</div>
+        <table class="t">
+          <tr><th>✅ Tốt</th><th>❌ Mơ hồ</th></tr>
+          <tr><td>Indent 2 spaces</td><td>Format cho đúng</td></tr>
+          <tr><td>Chạy <code>npm test</code> trước commit</td><td>Test code của bạn</td></tr>
+          <tr><td>API ở <code>src/api/handlers/</code></td><td>Giữ file gọn gàng</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 — VÍ DỤ CLAUDE.MD -->
+  <section class="slide" data-title="CLAUDE.md: ví dụ">
+    <div class="eyebrow">// VÍ DỤ MẪU</div>
+    <h1 class="title sm">Một <span class="accent">CLAUDE.md</span> tốt</h1>
+    <pre class="code"><span class="k"># Build &amp; Development</span>
+- Dev:   <span class="g">npm run dev</span>  <span class="c"># server ở localhost:3000</span>
+- Test:  <span class="g">npm test</span>     <span class="c"># dùng test:e2e cho integration</span>
+
+<span class="k"># Code Conventions</span>
+- File: kebab-case · Class: PascalCase · Hàm/biến: camelCase
+- Indent 2 spaces, dòng tối đa 100 ký tự, nháy đơn, không semicolon
+- React components: <span class="g">src/components/</span> · API: <span class="g">src/api/</span>
+
+<span class="k"># Before Committing</span>
+1. <span class="g">npm test</span>  2. <span class="g">npm run lint</span>  3. commit: type(scope): message
+
+<span class="k"># Important Rules</span>
+- KHÔNG commit .env / API key
+- Mọi feature mới phải có test · API response luôn xử lý lỗi
+
+<span class="k"># Architecture</span>
+- Xem <span class="g">@docs/architecture.md</span> cho thiết kế hệ thống</pre>
+    <div class="info-box"><span class="info-label">Vì sao tốt?</span> Cụ thể · có cấu trúc · dùng <code>@import</code> cho chi tiết · &lt; 200 dòng.</div>
+  </section>
+
+  <!-- 12 — SECTION: SKILLS -->
+  <section class="slide center-wrap" data-title="▶ Phần 2: Skills (trọng tâm)">
+    <div class="content-box">
+      <div class="eyebrow" style="text-align:center">// PHẦN 2 · 60 PHÚT · TRỌNG TÂM</div>
+      <h1 class="title big" style="text-align:center"><span class="accent">Skills</span></h1>
+      <p class="lead" style="text-align:center;margin-top:1.5vh;margin-bottom:0">Đóng gói quy trình &amp; kiến thức — nạp theo nhu cầu, tiết kiệm ngữ cảnh</p>
+    </div>
+  </section>
+
+  <!-- 13 — SKILLS LÀ GÌ -->
+  <section class="slide" data-title="Skills là gì">
+    <div class="eyebrow">// SKILLS</div>
+    <h1 class="title sm">Biến Claude thành <span class="accent">chuyên gia domain</span></h1>
+    <div class="grid-2">
+      <div class="content-box">
+        <div class="section-label">Giải quyết 2 vấn đề</div>
+        <ul class="bullet-list">
+          <li><strong>Loại bỏ lặp lại</strong> — đừng dán lại checklist mỗi lần</li>
+          <li><strong>Chuyên môn hóa</strong> — đóng gói instructions, context, best practices, tài liệu</li>
+        </ul>
+      </div>
+      <div class="content-box">
+        <div class="section-label">Đóng gói gì?</div>
+        <ul class="bullet-list">
+          <li>Hướng dẫn từng bước</li>
+          <li>Kiến thức domain</li>
+          <li>Quy trình / best practices</li>
+          <li>API docs, schema, ví dụ</li>
+        </ul>
+      </div>
+    </div>
+    <div class="info-box">
+      <span class="info-label">Ví von:</span> Skill giống <strong>tài liệu onboarding</strong> cho nhân viên mới — có tổ chức, đọc dần khi cần. Cốt lõi: <strong>Progressive Disclosure</strong>.
+    </div>
+  </section>
+
+  <!-- 14 — CẤU TRÚC SKILL.MD -->
+  <section class="slide" data-title="Cấu trúc SKILL.md">
+    <div class="eyebrow">// CẤU TRÚC FILE</div>
+    <h1 class="title sm">Mỗi skill là <span class="accent">một thư mục + SKILL.md</span></h1>
+    <div class="grid-2">
+      <div>
+        <pre class="code"><span class="c">--- frontmatter (YAML) ---</span>
+<span class="k">name:</span> <span class="g">skill-name</span>
+<span class="k">description:</span> <span class="g">Skill làm GÌ và</span>
+  <span class="g">KHI NÀO Claude nên dùng</span>
+<span class="c">--------------------------</span>
+
+<span class="k"># Hướng dẫn chính</span>
+Nội dung markdown ở đây...</pre>
+      </div>
+      <div class="content-box">
+        <div class="section-label">2 trường BẮT BUỘC</div>
+        <ul class="bullet-list">
+          <li><code>name</code> — ≤64 ký tự, chữ thường + gạch nối</li>
+          <li><code>description</code> — nêu <strong>WHAT + WHEN</strong>, viết ngôi thứ ba</li>
+        </ul>
+        <div class="highlight-box"><code>description</code> là trường QUAN TRỌNG NHẤT — nó quyết định Claude có tự kích hoạt skill không.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15 — FRONTMATTER TÙY CHỌN -->
+  <section class="slide" data-title="Trường frontmatter tùy chọn">
+    <div class="eyebrow">// FRONTMATTER · TÙY CHỌN</div>
+    <h1 class="title sm">Điều khiển <span class="accent">hành vi skill</span></h1>
+    <div class="content-box">
+      <table class="t">
+        <tr><th>Trường</th><th>Công dụng</th></tr>
+        <tr><td><code>allowed-tools</code></td><td>Tool dùng không cần hỏi quyền khi skill bật — vd <code>Bash(git *)</code></td></tr>
+        <tr><td><code>disable-model-invocation</code></td><td><code>true</code> → chỉ gọi tay <code>/tên</code> (cho thao tác side-effect: deploy, gửi tin)</td></tr>
+        <tr><td><code>user-invocable</code></td><td><code>false</code> → ẩn khỏi menu <code>/</code>, chỉ Claude tự nạp (kiến thức nền)</td></tr>
+        <tr><td><code>arguments</code></td><td>Tham số có tên cho thay thế <code>$tên</code></td></tr>
+        <tr><td><code>context: fork</code> + <code>agent</code></td><td>Chạy skill trong context cô lập của sub-agent</td></tr>
+        <tr><td><code>paths</code></td><td>Glob giới hạn skill chỉ tự kích hoạt với file khớp</td></tr>
+      </table>
+    </div>
+    <div class="info-box"><span class="info-label">Inline:</span> <code>!`git diff HEAD`</code> chạy <strong>TRƯỚC</strong> khi Claude đọc skill, kết quả thay vào chỗ đó — tiền xử lý, không tốn token để "lấy" dữ liệu.</div>
+  </section>
+
+  <!-- 16 — NƠI SKILLS SỐNG -->
+  <section class="slide" data-title="Nơi Skills sống">
+    <div class="eyebrow">// VỊ TRÍ & TÀI NGUYÊN KÈM</div>
+    <h1 class="title sm">Skill <span class="accent">= thư mục</span> có tài nguyên</h1>
+    <div class="grid-2">
+      <div class="content-box">
+        <div class="section-label">Cấp độ</div>
+        <ul class="bullet-list">
+          <li><code>~/.claude/skills/</code> — cá nhân (mọi dự án)</li>
+          <li><code>.claude/skills/</code> — dự án (commit git)</li>
+          <li>Plugin — namespace <code>/plugin:skill</code></li>
+        </ul>
+        <div class="section-label">Phát hiện</div>
+        <ul class="bullet-list">
+          <li>Chỉ <strong>metadata</strong> nạp lúc khởi động (~100 token/skill)</li>
+          <li>Sửa SKILL.md → hiệu lực <strong>ngay</strong></li>
+        </ul>
+      </div>
+      <div>
+        <pre class="code">pdf-processing/
+├── <span class="g">SKILL.md</span>      <span class="c"># BẮT BUỘC (như mục lục)</span>
+├── FORMS.md      <span class="c"># hướng dẫn chi tiết</span>
+├── REFERENCE.md  <span class="c"># API đầy đủ</span>
+└── scripts/
+    └── <span class="b">fill_form.py</span>  <span class="c"># script chạy được</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- 17 — PROGRESSIVE DISCLOSURE -->
+  <section class="slide" data-title="★ Progressive Disclosure">
+    <div class="eyebrow">// ★ KHÁI NIỆM CỐT LÕI</div>
+    <h1 class="title sm">Progressive Disclosure — <span class="accent">nạp 3 tầng</span></h1>
+    <div class="content-box">
+      <table class="t">
+        <tr><th>Tầng</th><th>Nội dung</th><th>Nạp khi nào</th><th>Token</th></tr>
+        <tr><td><strong>1. Metadata</strong></td><td>name + description</td><td>Khởi động</td><td>~100/skill</td></tr>
+        <tr><td><strong>2. Instructions</strong></td><td>Thân SKILL.md</td><td>Khi kích hoạt</td><td>&lt; 5.000</td></tr>
+        <tr><td><strong>3. Resources</strong></td><td>File tham khảo, script</td><td>Chỉ khi tham chiếu tới</td><td>gần như ∞</td></tr>
+      </table>
+    </div>
+    <pre class="code">SKILL.md (2KB) ──link──> reference/finance.md  <span class="g">(đọc khi hỏi doanh thu)</span>
+                ├───────> reference/sales.md    <span class="c">(KHÔNG đọc → 0 token)</span>
+                ├───────> reference/product.md  <span class="c">(KHÔNG đọc → 0 token)</span>
+                └───────> reference/marketing.md<span class="c">(KHÔNG đọc → 0 token)</span></pre>
+  </section>
+
+  <!-- 18 — KÍCH HOẠT -->
+  <section class="slide" data-title="Kích hoạt: tự động vs thủ công">
+    <div class="eyebrow">// KÍCH HOẠT</div>
+    <h1 class="title sm">Tự động <span class="accent">vs</span> thủ công</h1>
+    <div class="grid-2">
+      <div class="card">
+        <span class="tag">Tự động</span>
+        <h3>Model quyết định</h3>
+        <p>Claude so khớp task với <code>description</code> của các skill. Khớp → tự nạp.</p>
+        <div class="highlight-box" style="margin-top:1vh">Chất lượng <code>description</code> quyết định tất cả</div>
+      </div>
+      <div class="card">
+        <span class="tag">Thủ công</span>
+        <h3>Người dùng gõ</h3>
+        <p>Gõ <code>/tên-skill</code> đầu message; truyền tham số:</p>
+        <pre class="code" style="margin-top:1vh">/fix-issue <span class="g">123</span></pre>
+      </div>
+    </div>
+    <div class="info-box">
+      <span class="info-label">Điều khiển:</span> <code>disable-model-invocation: true</code> → chỉ gọi tay · <code>user-invocable: false</code> → ẩn khỏi menu, chỉ Claude tự nạp · bỏ trống cả hai = cả hai chiều (mặc định).
+    </div>
+  </section>
+
+  <!-- 19 — DESCRIPTION TỐT VS KÉM -->
+  <section class="slide" data-title="Viết description tốt">
+    <div class="eyebrow">// description LÀ TẤT CẢ</div>
+    <h1 class="title sm">WHAT + WHEN + <span class="accent">từ khóa người dùng hay nói</span></h1>
+    <div class="content-box">
+      <div class="section-label">❌ Kém — mơ hồ</div>
+      <pre class="code"><span class="k">description:</span> <span class="no">Helps with documents</span></pre>
+      <div class="section-label" style="margin-top:1.5vh">✅ Tốt — cụ thể, có trigger</div>
+      <pre class="code"><span class="k">description:</span> <span class="g">Extract text and tables from PDF files, fill
+  forms, merge documents. Use when working with PDFs or when
+  the user mentions PDFs, forms, or document extraction.</span></pre>
+    </div>
+    <div class="info-box"><span class="info-label">Công thức:</span> nêu rõ <strong>làm gì</strong> (liệt kê output cụ thể) + <strong>khi nào dùng</strong> (cụm từ người dùng tự nhiên sẽ nói).</div>
+  </section>
+
+  <!-- 20 — SCRIPT TRONG SKILL -->
+  <section class="slide" data-title="Script trong Skill">
+    <div class="eyebrow">// SCRIPT THỰC THI</div>
+    <h1 class="title sm">Code script <span class="accent">không tốn token</span></h1>
+    <div class="grid-2">
+      <div>
+        <pre class="code"><span class="c">## Phân tích PDF</span>
+<span class="k">```bash</span>
+python <span class="g">${CLAUDE_SKILL_DIR}</span>/scripts/analyze.py "$f"
+<span class="k">```</span></pre>
+        <div class="info-box" style="margin-top:1.5vh">Chỉ <strong>output</strong> của script vào ngữ cảnh; <strong>code script KHÔNG nạp</strong>.</div>
+      </div>
+      <div class="content-box">
+        <div class="section-label">Script vs Văn bản?</div>
+        <table class="t">
+          <tr><th>Dùng SCRIPT</th><th>Dùng VĂN BẢN</th></tr>
+          <tr><td>Thao tác mong manh</td><td>Nhiều cách hợp lệ</td></tr>
+          <tr><td>Cần nhất quán tuyệt đối</td><td>Quyết định theo ngữ cảnh</td></tr>
+          <tr><td>Xử lý lỗi phức tạp</td><td>Cần Claude suy luận</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 21 — VÍ DỤ SKILL HOÀN CHỈNH -->
+  <section class="slide" data-title="Ví dụ Skill hoàn chỉnh">
+    <div class="eyebrow">// VÍ DỤ · INJECT CONTEXT ĐỘNG</div>
+    <h1 class="title sm"><span class="accent">summarize-changes</span></h1>
+    <pre class="code"><span class="c">--- .claude/skills/summarize-changes/SKILL.md ---</span>
+<span class="k">name:</span> <span class="g">summarize-changes</span>
+<span class="k">description:</span> <span class="g">Summarizes uncommitted changes and flags risks.</span>
+  <span class="g">Use when asking what changed, requesting a commit message,</span>
+  <span class="g">or reviewing your diff.</span>
+<span class="c">-------------------------------------------------</span>
+
+<span class="k"># Summarize Changes</span>
+<span class="c">## Thay đổi chưa commit</span>
+<span class="b">!`git diff HEAD`</span>          <span class="c"># ← chạy trước, kết quả inline</span>
+
+<span class="c">## Hướng dẫn</span>
+Tóm tắt 2-3 gạch đầu dòng, rồi liệt kê rủi ro: thiếu xử lý
+lỗi, giá trị hardcode, test cần cập nhật.</pre>
+    <div class="info-box"><span class="info-label">Gọi:</span> <code>/summarize-changes</code> → <code>git diff</code> được inline tự động, không tốn lượt riêng để lấy.</div>
+  </section>
+
+  <!-- 22 — BEST PRACTICES SKILLS -->
+  <section class="slide" data-title="Best practices Skills">
+    <div class="eyebrow">// BEST PRACTICES</div>
+    <h1 class="title sm">Viết Skill <span class="accent">hiệu quả</span></h1>
+    <div class="grid-2">
+      <div class="content-box">
+        <ul class="bullet-list">
+          <li><strong>Ngắn gọn là vua</strong> — SKILL.md &lt; 500 dòng</li>
+          <li><strong>description kỹ</strong> — what + when + từ khóa</li>
+          <li><strong>SKILL.md như mục lục</strong> — chi tiết đẩy sang file riêng</li>
+          <li>Tránh tham chiếu lồng sâu (1 cấp là đủ)</li>
+        </ul>
+      </div>
+      <div class="content-box">
+        <ul class="bullet-list">
+          <li>Đặt tên dạng gerund: <code>processing-pdfs</code></li>
+          <li>Luôn dùng dấu <code>/</code> trong path (kể cả Windows)</li>
+          <li>Không thông tin nhạy thời gian</li>
+          <li>Có <code>/skill-creator</code> để tạo/cải thiện</li>
+        </ul>
+      </div>
+    </div>
+    <div class="info-box"><span class="info-label">Bảo mật:</span> coi Skill như <strong>cài phần mềm</strong> — chỉ dùng nguồn tin cậy, audit kỹ SKILL.md + script.</div>
+  </section>
+
+  <!-- 23 — NGHỈ -->
+  <section class="slide center-wrap" data-title="☕ Nghỉ giải lao">
+    <div class="content-box" style="text-align:center">
+      <div class="eyebrow" style="text-align:center">// 10 PHÚT</div>
+      <h1 class="title big" style="text-align:center">☕ <span class="accent">Nghỉ giải lao</span></h1>
+      <p class="lead" style="text-align:center;margin:1.5vh 0 0">Quay lại với phần Sub-agents</p>
+    </div>
+  </section>
+
+  <!-- 24 — SECTION: SUB-AGENTS -->
+  <section class="slide center-wrap" data-title="▶ Phần 3: Sub-agents">
+    <div class="content-box">
+      <div class="eyebrow" style="text-align:center">// PHẦN 3 · 30 PHÚT</div>
+      <h1 class="title big" style="text-align:center"><span class="accent">Sub-agents</span></h1>
+      <p class="lead" style="text-align:center;margin-top:1.5vh;margin-bottom:0">Trợ lý chuyên biệt với cửa sổ ngữ cảnh RIÊNG</p>
+    </div>
+  </section>
+
+  <!-- 25 — SUB-AGENT LÀ GÌ -->
+  <section class="slide" data-title="Sub-agent là gì">
+    <div class="eyebrow">// SUB-AGENTS</div>
+    <h1 class="title sm">Làm việc trong <span class="accent">context cô lập</span></h1>
+    <div class="grid-2">
+      <div class="content-box">
+        <div class="section-label">Mỗi sub-agent có riêng</div>
+        <ul class="bullet-list">
+          <li>System prompt riêng</li>
+          <li>Quyền truy cập tool riêng</li>
+          <li>(Tùy chọn) model, memory, hooks riêng</li>
+        </ul>
+      </div>
+      <div class="content-box">
+        <div class="section-label">Tính cô lập</div>
+        <ul class="bullet-list">
+          <li><strong>Không thấy</strong> lịch sử hội thoại của bạn</li>
+          <li>Output dài dòng ở lại context của nó</li>
+          <li>Chỉ <strong>trả về tóm tắt</strong> → ngữ cảnh chính sạch</li>
+        </ul>
+      </div>
+    </div>
+    <div class="info-box"><span class="info-label">Cốt lõi:</span> Claude <strong>giao việc (delegate)</strong> khi task khớp <code>description</code>; sub-agent làm độc lập rồi trả kết quả.</div>
+  </section>
+
+  <!-- 26 — VÌ SAO DÙNG -->
+  <section class="slide" data-title="Vì sao dùng Sub-agent">
+    <div class="eyebrow">// LỢI ÍCH</div>
+    <h1 class="title sm">Khi nào cần <span class="accent">"phòng làm việc" riêng</span></h1>
+    <div class="grid-3">
+      <div class="card"><span class="tag">Context</span><h3>Giữ sạch</h3><p>Research codebase ở sub-agent, chỉ tóm tắt quay về</p></div>
+      <div class="card"><span class="tag">Bảo mật</span><h3>Ràng buộc quyền</h3><p>Agent research read-only, không Write/Edit</p></div>
+      <div class="card"><span class="tag">Tái dùng</span><h3>Dùng mọi dự án</h3><p>Tạo code-reviewer một lần ở <code>~/.claude/agents/</code></p></div>
+      <div class="card"><span class="tag">Chi phí</span><h3>Model rẻ hơn</h3><p>Việc read-only đẩy sang Haiku</p></div>
+      <div class="card"><span class="tag">Tốc độ</span><h3>Song song</h3><p>Nhiều sub-agent research nhiều mảng cùng lúc</p></div>
+      <div class="card"><span class="tag">Chuyên môn</span><h3>Tối ưu 1 việc</h3><p>System prompt riêng cho từng vai trò</p></div>
+    </div>
+  </section>
+
+  <!-- 27 — FILE ĐỊNH NGHĨA -->
+  <section class="slide" data-title="File định nghĩa Sub-agent">
+    <div class="eyebrow">// FILE ĐỊNH NGHĨA</div>
+    <h1 class="title sm">Markdown + YAML ở <span class="accent">.claude/agents/</span></h1>
+    <div class="grid-2">
+      <div>
+        <pre class="code"><span class="c">--- .claude/agents/code-reviewer.md ---</span>
+<span class="k">name:</span> <span class="g">code-reviewer</span>
+<span class="k">description:</span> <span class="g">Expert code review. Use</span>
+  <span class="g">immediately after writing code.</span>
+<span class="k">tools:</span> <span class="g">Read, Grep, Glob, Bash</span>
+<span class="k">model:</span> <span class="g">sonnet</span>
+<span class="c">----------------------------------------</span>
+
+<span class="k"># Code Review Agent</span>
+Bạn là senior reviewer...
+1. Chạy git diff HEAD
+2. Review theo ưu tiên</pre>
+      </div>
+      <div class="content-box">
+        <div class="section-label">Trường chính</div>
+        <ul class="bullet-list">
+          <li><code>name</code> ✅ · <code>description</code> ✅ (điều khiển delegate)</li>
+          <li><code>tools</code> — allowlist (bỏ trống = kế thừa hết)</li>
+          <li><code>disallowedTools</code> — denylist</li>
+          <li><code>model</code> · <code>permissionMode</code> · <code>memory</code></li>
+        </ul>
+        <p style="font-size:1rem;margin-top:1vh">Thân markdown = <strong>system prompt</strong>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 28 — CÁCH GỌI + TOOL -->
+  <section class="slide" data-title="Cách gọi + kiểm soát tool">
+    <div class="eyebrow">// GỌI & KIỂM SOÁT TOOL</div>
+    <h1 class="title sm">3 mức kiểm soát <span class="accent">tăng dần</span></h1>
+    <div class="grid-3">
+      <div class="card"><span class="tag">Mức 1</span><h3>Ngôn ngữ tự nhiên</h3><p>"Dùng code reviewer kiểm tra thay đổi" → Claude quyết định</p></div>
+      <div class="card"><span class="tag">Mức 2</span><h3>@-mention</h3><p><code>@code-reviewer xem module auth</code> → đảm bảo chạy đúng agent</p></div>
+      <div class="card"><span class="tag">Mức 3</span><h3>Cả session</h3><p><code>claude --agent code-reviewer</code></p></div>
+    </div>
+    <div class="content-box">
+      <div class="section-label">Sub-agent dựng sẵn</div>
+      <ul class="bullet-list">
+        <li><strong>Explore</strong> — chỉ read-only · <strong>Plan</strong> — read-only để lập kế hoạch · <strong>general-purpose</strong> — đầy đủ tool</li>
+      </ul>
+    </div>
+    <div class="info-box"><span class="info-label">Quản lý:</span> <code>/agents</code> mở giao diện tạo/sửa/xóa, chọn tool/model/màu/memory — <strong>cách khuyến nghị</strong> thay vì sửa file tay.</div>
+  </section>
+
+  <!-- 29 — TỔNG KẾT: BẢNG SO SÁNH -->
+  <section class="slide" data-title="★ So sánh 4 công cụ">
+    <div class="eyebrow">// TỔNG KẾT · CHỐT</div>
+    <h1 class="title sm">Chọn <span class="accent">công cụ nào?</span></h1>
+    <div class="content-box">
+      <table class="t">
+        <tr><th>Tiêu chí</th><th>CLAUDE.md</th><th>Skills</th><th>Sub-agents</th><th>Slash cmd</th></tr>
+        <tr><td>Nạp khi nào</td><td>Luôn</td><td>Khi cần</td><td>Khi giao việc</td><td>Khi gõ</td></tr>
+        <tr><td>Cô lập ngữ cảnh</td><td class="no">Không</td><td class="no">Không</td><td class="yes">Có (riêng)</td><td class="no">Không</td></tr>
+        <tr><td>Hạn chế tool</td><td class="no">Không</td><td class="yes">Có</td><td class="yes">Có</td><td>Tùy</td></tr>
+        <tr><td>Vị trí</td><td><code>CLAUDE.md</code></td><td><code>skills/</code></td><td><code>agents/</code></td><td><code>commands/</code></td></tr>
+        <tr><td>Dùng cho</td><td>Luật, quy ước</td><td>Quy trình tái dùng</td><td>Research/review nặng</td><td>Hành động cố định</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 30 — CÂY QUYẾT ĐỊNH -->
+  <section class="slide" data-title="Cây quyết định">
+    <div class="eyebrow">// CÂY QUYẾT ĐỊNH</div>
+    <h1 class="title sm">Hỏi 3 câu, <span class="accent">chọn đúng công cụ</span></h1>
+    <pre class="code">Giao việc khép kín cho context cô lập (research, review nặng)?
+   <span class="g">CÓ →</span> <span class="b">Sub-agent</span>
+   KHÔNG ↓
+Có quy trình/kiến thức nhiều bước, tái dùng, nạp theo nhu cầu?
+   <span class="g">CÓ →</span> <span class="b">Skill</span>
+   KHÔNG ↓
+Là luật/quy ước áp dụng cho MỌI session?
+   <span class="g">CÓ →</span> <span class="b">CLAUDE.md</span>
+   KHÔNG → <span class="b">Slash command</span> / gõ yêu cầu trực tiếp</pre>
+    <div class="grid-2">
+      <div class="info-box">"Mọi API response phải có error handling" → <strong>CLAUDE.md</strong><br>"Quy trình deploy 5 bước" → <strong>Skill</strong> <code>/deploy</code></div>
+      <div class="info-box">"Phân tích module auth codebase lớn" → <strong>Sub-agent</strong><br>"Sửa issue theo chuẩn" → <strong>Skill</strong> <code>/fix-issue 123</code></div>
+    </div>
+  </section>
+
+  <!-- 31 — KẾT -->
+  <section class="slide center-wrap" data-title="Cảm ơn & Q&A">
+    <div class="content-box" style="max-width:66vw">
+      <div class="eyebrow" style="text-align:center">// CẢM ƠN</div>
+      <h1 class="title" style="text-align:center;font-size:2.8rem">Ba công cụ <span class="accent">bổ trợ nhau</span></h1>
+      <p class="lead" style="text-align:center;margin-top:2vh">
+        CLAUDE.md đặt nền <em>(luôn bật)</em> · Skills đóng gói quy trình <em>(bật khi cần)</em> · Sub-agents cô lập việc nặng <em>(context riêng)</em>.
+      </p>
+      <div class="highlight-box" style="display:block;text-align:center;margin-top:1vh">
+        Hiểu <strong>thời điểm nạp</strong> + <strong>phạm vi ngữ cảnh</strong> = dùng Claude Code chuyên nghiệp.
+      </div>
+      <p style="text-align:center;margin-top:2vh;color:var(--muted)">Q&amp;A · Bài tập: tạo skill <code>commit-helper</code> &amp; sub-agent <code>test-writer</code></p>
+    </div>
+  </section>
+
+</div>
+
+<!-- ESC overview menu -->
+<div class="overview" id="overview">
+  <h2>// MỤC LỤC — bấm để nhảy tới slide (ESC để đóng)</h2>
+  <div class="overview-grid" id="overviewGrid"></div>
+</div>
+
+<!-- Footer (shared, updated by JS) -->
+<div class="footer" id="footer">
+  <div><span class="key">←/→</span>chuyển &nbsp; <span class="key">ESC</span>menu</div>
+  <div class="progress" id="progressBar" style="--progress: 0%;"></div>
+  <div id="counter">Claude Code · 1 / 1</div>
+</div>
+
+<script>
+  (function () {
+    const root = document.documentElement;
+
+    // Theme toggle
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('slide-theme');
+    if (saved === 'light' || saved === 'dark') root.setAttribute('data-theme', saved);
+    btn.addEventListener('click', () => {
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('slide-theme', next); } catch (e) {}
+    });
+
+    // Slides
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const total = slides.length;
+    let idx = 0;
+
+    const progressBar = document.getElementById('progressBar');
+    const counter = document.getElementById('counter');
+    const footer = document.getElementById('footer');
+
+    function render() {
+      slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+      const pct = total > 1 ? Math.round((idx / (total - 1)) * 100) : 0;
+      progressBar.style.setProperty('--progress', pct + '%');
+      counter.textContent = 'Claude Code · ' + (idx + 1) + ' / ' + total;
+      try { localStorage.setItem('slide-idx', String(idx)); } catch (e) {}
+    }
+    function go(n) { idx = Math.max(0, Math.min(total - 1, n)); render(); }
+    function next() { go(idx + 1); }
+    function prev() { go(idx - 1); }
+
+    document.getElementById('nextBtn').addEventListener('click', next);
+    document.getElementById('prevBtn').addEventListener('click', prev);
+
+    // ESC overview
+    const overview = document.getElementById('overview');
+    const grid = document.getElementById('overviewGrid');
+    slides.forEach((s, i) => {
+      const item = document.createElement('div');
+      item.className = 'ov-item';
+      item.innerHTML = '<span class="n">' + (i + 1) + '</span>' + (s.dataset.title || ('Slide ' + (i + 1)));
+      item.addEventListener('click', () => { go(i); overview.classList.remove('open'); });
+      grid.appendChild(item);
+    });
+    function toggleOverview() { overview.classList.toggle('open'); }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); next(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+      else if (e.key === 'Home') { go(0); }
+      else if (e.key === 'End') { go(total - 1); }
+      else if (e.key === 'Escape') { toggleOverview(); }
+      else if (e.key === 'f' || e.key === 'F') {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+        else document.exitFullscreen?.();
+      }
+    });
+
+    // Restore last slide
+    const savedIdx = parseInt(localStorage.getItem('slide-idx') || '0', 10);
+    if (!isNaN(savedIdx) && savedIdx >= 0 && savedIdx < total) idx = savedIdx;
+    render();
+  })();
+</script>
+
+</body>
+</html>

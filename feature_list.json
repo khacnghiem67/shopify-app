@@ -1,6 +1,6 @@
 {
-  "project": "replace-with-project-name",
-  "last_updated": "2026-06-17",
+  "project": "bulkprice-shopify-app",
+  "last_updated": "2026-06-25",
   "rules": {
     "single_active_feature": true,
     "passing_requires_evidence": true,
@@ -14,18 +14,108 @@
   },
   "features": [
     {
-      "id": "example-001",
+      "id": "feat-001",
       "priority": 1,
-      "area": "replace-with-area",
-      "title": "Replace with the first user-visible feature",
-      "user_visible_behavior": "Describe what a user can observe when this feature works.",
+      "area": "environment",
+      "title": "Scaffold Shopify Remix app + green init.sh harness",
+      "user_visible_behavior": "From a clean checkout, `bash init.sh` installs deps and runs typecheck + lint + test + build, ending in HARNESS GREEN.",
+      "dependencies": [],
+      "status": "passing",
+      "verification": [
+        "Run `bash init.sh`.",
+        "Observe it ends with HARNESS GREEN (typecheck, lint, test, build all pass)."
+      ],
+      "evidence": [
+        "bash init.sh -> HARNESS GREEN (2026-06-25). 1/6 Node v22.16.0 OK. 2/6 npm install: up to date, 1141 packages. 3/6 prisma generate: Generated Prisma Client v6.19.3. 4/6 typecheck (tsc --noEmit): 0 errors. 5/6 lint: clean (only @remix-run/eslint-config deprecation warning); vitest run --passWithNoTests: No test files found, exit 0. 6/6 build (remix vite:build): 1428 modules transformed, built in 10.91s + SSR built in 273ms.",
+        "Fixed dependency drift: pinned @shopify/shopify-api to 13.1.0 via overrides/resolutions (template ^ ranges pulled two copies 12.3.0 + 13.1.0, breaking PrismaSessionStorage Session types)."
+      ],
+      "notes": "Built from the official Shopify Remix template (cloned from github.com/Shopify/shopify-app-template-remix, since `create-app` requires interactive Partner-org selection). Store linking is a manual demo step. Added scripts: typecheck (tsc --noEmit), test (vitest run --passWithNoTests). Added vitest devDependency."
+    },
+    {
+      "id": "feat-002",
+      "priority": 2,
+      "area": "pricing-core",
+      "title": "Pure pricing rules + Vitest tests (TDD)",
+      "user_visible_behavior": "Pricing math (percentage, round-to-.99, set-compare-at, money parse/format) is implemented as pure functions and covered by passing unit tests.",
+      "dependencies": ["feat-001"],
       "status": "not_started",
       "verification": [
-        "List the concrete steps that prove the behavior.",
-        "Each step should be observable, not an internal assumption."
+        "Run `npm run test` — Vitest suite for app/lib/pricing.ts is green.",
+        "Run `npm run typecheck` — no type errors."
       ],
       "evidence": [],
-      "notes": "Delete this placeholder once real features are defined."
+      "notes": "app/lib/pricing.ts must have zero Shopify/Remix/Polaris imports."
+    },
+    {
+      "id": "feat-003",
+      "priority": 3,
+      "area": "data-read",
+      "title": "Products loader (Admin GraphQL read)",
+      "user_visible_behavior": "The app route loads products (title + first-variant price + compareAtPrice) from the store via the Admin GraphQL `products` query.",
+      "dependencies": ["feat-001"],
+      "status": "not_started",
+      "verification": [
+        "Run `npm run typecheck && npm run build` — compiles with the new loader.",
+        "If a dev store is connected: `npm run dev` lists product titles + prices (screenshot)."
+      ],
+      "evidence": []
+    },
+    {
+      "id": "feat-004",
+      "priority": 4,
+      "area": "ui",
+      "title": "Polaris UI: selection, rule form, live preview",
+      "user_visible_behavior": "Merchant selects products, sets a percentage + toggles, and sees a live before/after price preview before applying.",
+      "dependencies": ["feat-002", "feat-003"],
+      "status": "not_started",
+      "verification": [
+        "Run `npm run typecheck && npm run build`.",
+        "If a dev store is connected: selecting rows and changing the rule updates the preview live (screenshot)."
+      ],
+      "evidence": []
+    },
+    {
+      "id": "feat-005",
+      "priority": 5,
+      "area": "data-write",
+      "title": "Apply action (productVariantsBulkUpdate write)",
+      "user_visible_behavior": "Clicking Apply writes new prices (and optional compare-at) to the selected products; a success banner reports updated/skipped counts.",
+      "dependencies": ["feat-004"],
+      "status": "not_started",
+      "verification": [
+        "Run `npm run typecheck && npm run build`.",
+        "Live demo on a dev store: select products → -20% → Apply → confirm new price + strikethrough compare-at in Shopify admin (before/after screenshots)."
+      ],
+      "evidence": [],
+      "notes": "Requires the dev store + write_products scope. This is the real end-to-end demo evidence."
+    },
+    {
+      "id": "feat-006",
+      "priority": 6,
+      "area": "polish",
+      "title": "Polish + capture demo evidence",
+      "user_visible_behavior": "Empty-state + submitting state handled; demo screenshots/log captured under docs/demo/.",
+      "dependencies": ["feat-005"],
+      "status": "not_started",
+      "verification": [
+        "Run `bash init.sh` — HARNESS GREEN.",
+        "docs/demo/ contains before/after evidence."
+      ],
+      "evidence": []
+    },
+    {
+      "id": "feat-007",
+      "priority": 7,
+      "area": "docs",
+      "title": "Docs, handoff, and presentation file",
+      "user_visible_behavior": "docs/PRESENTATION.md answers the six course questions; README + handoff updated; clean state.",
+      "dependencies": ["feat-006"],
+      "status": "not_started",
+      "verification": [
+        "docs/PRESENTATION.md exists and answers all six questions.",
+        "Run `bash init.sh && git status --short` — green, no stray/.env files."
+      ],
+      "evidence": []
     }
   ]
 }

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hands-on Lab — Cắm MCP đầu tiên của bạn (Filesystem)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root, [data-theme="dark"] {
+    --bg: #0a0f0d; --bg-2: #0d1411; --bg-3: #111a16;
+    --green: #4ade80; --green-bright: #6ee7a0; --green-glow: rgba(74,222,128,0.15);
+    --orange: #f5a623; --blue: #6cb3ff; --purple: #c084fc; --red: #f87171;
+    --text: #e8efe9; --text-strong: #ffffff; --muted: #8b9a90;
+    --grid-line: rgba(74,222,128,0.03); --progress-track: rgba(255,255,255,0.06);
+    --box-bg-start: rgba(74,222,128,0.06); --box-bg-end: rgba(74,222,128,0.02);
+    --highlight-bg: rgba(74,222,128,0.12); --highlight-border: rgba(74,222,128,0.3);
+    --info-bg: rgba(108,179,255,0.07); --code-bg: #06100b; --line: rgba(255,255,255,0.1);
+    --warn-bg: rgba(245,166,35,0.08); --red-bg: rgba(248,113,113,0.08);
+  }
+  [data-theme="light"] {
+    --bg: #f5f7f4; --bg-2: #ffffff; --bg-3: #eef3ee;
+    --green: #16a34a; --green-bright: #15803d; --green-glow: rgba(22,163,74,0.18);
+    --orange: #b8740a; --blue: #2563eb; --purple: #7c3aed; --red: #dc2626;
+    --text: #1f2421; --text-strong: #0a0f0d; --muted: #5b6a60;
+    --grid-line: rgba(22,163,74,0.05); --progress-track: rgba(0,0,0,0.08);
+    --box-bg-start: rgba(22,163,74,0.08); --box-bg-end: rgba(22,163,74,0.02);
+    --highlight-bg: rgba(22,163,74,0.12); --highlight-border: rgba(22,163,74,0.35);
+    --info-bg: rgba(37,99,235,0.06); --code-bg: #0c1a12; --line: rgba(0,0,0,0.12);
+    --warn-bg: rgba(184,116,10,0.1); --red-bg: rgba(220,38,38,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: "JetBrains Mono","Fira Code","Courier New",monospace;
+    font-feature-settings: "calt" 1,"liga" 1; line-height: 1.6;
+    transition: background .3s ease, color .3s ease;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* ---- top bar ---- */
+  .topbar {
+    position: sticky; top: 0; z-index: 30; display: flex; align-items: center;
+    justify-content: space-between; gap: 1rem; padding: 12px 5vw;
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);
+  }
+  .topbar .brand { font-family: "Space Grotesk",sans-serif; font-weight: 700; color: var(--text-strong); font-size: 1rem; }
+  .topbar .brand .accent { color: var(--green); }
+  .topbar .right { display: flex; align-items: center; gap: 10px; }
+  .theme-toggle { display: flex; align-items: center; gap: 7px; padding: 6px 12px; background: var(--box-bg-start); border: 1px solid var(--highlight-border); border-radius: 999px; color: var(--text); font-family: inherit; font-size: .75rem; cursor: pointer; transition: all .2s; }
+  .theme-toggle:hover { background: var(--highlight-bg); }
+  .theme-toggle svg { width: 14px; height: 14px; stroke: var(--green); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  [data-theme="dark"] .icon-sun { display: block; } [data-theme="dark"] .icon-moon { display: none; }
+  [data-theme="light"] .icon-sun { display: none; } [data-theme="light"] .icon-moon { display: block; }
+
+  .wrap { max-width: 960px; margin: 0 auto; padding: 3vh 5vw 12vh; }
+
+  /* ---- hero ---- */
+  .hero { padding: 4vh 0 2vh; border-bottom: 1px solid var(--line); margin-bottom: 3vh; }
+  .eyebrow { color: var(--green); font-size: .85rem; letter-spacing: .14em; font-weight: 500; text-transform: uppercase; }
+  h1 { font-family: "Space Grotesk","Inter",sans-serif; font-weight: 700; color: var(--text-strong); line-height: 1.12; letter-spacing: -.02em; font-size: 2.4rem; margin: 1.2vh 0; }
+  h1 .accent { color: var(--green); }
+  .hero .sub { color: var(--muted); font-size: 1.05rem; max-width: 70ch; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2.2vh; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border: 1px solid var(--highlight-border); border-radius: 999px; font-size: .8rem; color: var(--green-bright); background: var(--highlight-bg); }
+  .chip.b { color: var(--blue); border-color: rgba(108,179,255,.4); background: rgba(108,179,255,.1); }
+  .chip.o { color: var(--orange); border-color: rgba(245,166,35,.4); background: rgba(245,166,35,.1); }
+
+  h2 { font-family: "Space Grotesk",sans-serif; font-weight: 700; color: var(--text-strong); font-size: 1.6rem; margin: 5vh 0 1.6vh; padding-top: 1vh; letter-spacing: -.01em; scroll-margin-top: 80px; }
+  h2 .num { display: inline-grid; place-items: center; width: 1.9rem; height: 1.9rem; border-radius: 8px; background: var(--green); color: #04150b; font-size: 1rem; margin-right: .7rem; vertical-align: middle; }
+  h3 { font-family: "Space Grotesk",sans-serif; font-weight: 600; color: var(--text-strong); font-size: 1.15rem; margin: 2.6vh 0 1vh; }
+  p { margin: 1vh 0; }
+  a { color: var(--blue); }
+  ul, ol { margin: 1vh 0 1vh 1.4rem; } li { margin: .5vh 0; }
+  code { background: var(--code-bg); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; font-size: .9em; color: var(--green-bright); white-space: nowrap; }
+  strong { color: var(--text-strong); }
+  .lead { font-size: 1.1rem; color: var(--text); }
+
+  /* ---- TOC ---- */
+  .toc { background: linear-gradient(180deg, var(--box-bg-start), var(--box-bg-end)); border-left: 3px solid var(--green); border-radius: 6px; padding: 2vh 2vw; margin: 2vh 0; }
+  .toc h4 { color: var(--orange); font-size: .85rem; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 1vh; }
+  .toc ol { margin-left: 1.2rem; columns: 2; column-gap: 2.5vw; }
+  .toc a { color: var(--text); text-decoration: none; }
+  .toc a:hover { color: var(--green); }
+  @media (max-width: 700px){ .toc ol { columns: 1; } }
+
+  /* ---- step ---- */
+  .step { display: flex; gap: 1.1rem; margin: 2.4vh 0; }
+  .step .badge { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 50%; background: var(--highlight-bg); border: 2px solid var(--green); color: var(--green-bright); font-weight: 700; display: grid; place-items: center; font-size: .9rem; }
+  .step .body { flex: 1; min-width: 0; }
+  .step .body > h3:first-child { margin-top: .2vh; }
+
+  /* ---- code block + copy ---- */
+  .codewrap { position: relative; margin: 1.4vh 0; }
+  .codewrap .copy { position: absolute; top: 8px; right: 8px; padding: 4px 10px; font-family: inherit; font-size: .72rem; color: var(--text); background: var(--bg-3); border: 1px solid var(--line); border-radius: 5px; cursor: pointer; transition: all .15s; opacity: .85; }
+  .codewrap .copy:hover { background: var(--highlight-bg); border-color: var(--highlight-border); color: var(--green-bright); }
+  .codewrap .copy.ok { color: var(--green-bright); border-color: var(--highlight-border); }
+  pre { background: var(--code-bg); border: 1px solid var(--line); border-left: 3px solid var(--green); border-radius: 8px; padding: 1.6vh 3.2rem 1.6vh 1.2rem; overflow-x: auto; font-size: .9rem; line-height: 1.55; color: var(--text); white-space: pre; }
+  pre .cm { color: var(--muted); }
+  .label-tab { display:inline-block; font-size:.72rem; color:var(--muted); background:var(--bg-3); border:1px solid var(--line); border-bottom:none; border-radius:6px 6px 0 0; padding:3px 10px; margin-bottom:-2px; position:relative; z-index:1; }
+
+  /* ---- callouts ---- */
+  .note { border-left: 3px solid var(--blue); background: var(--info-bg); padding: 1.4vh 1.4vw; border-radius: 4px; margin: 1.6vh 0; font-size: .98rem; }
+  .note.tip { border-left-color: var(--green); background: var(--highlight-bg); }
+  .note.warn { border-left-color: var(--orange); background: var(--warn-bg); }
+  .note.check { border-left-color: var(--green); background: var(--highlight-bg); }
+  .note.danger { border-left-color: var(--red); background: var(--red-bg); }
+  .note .lbl { font-weight: 700; }
+  .note.tip .lbl, .note.check .lbl { color: var(--green-bright); }
+  .note.warn .lbl { color: var(--orange); }
+  .note.danger .lbl { color: var(--red); }
+  .note .lbl.blue { color: var(--blue); }
+
+  /* ---- path cards ---- */
+  .paths { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4vw; margin: 2vh 0; }
+  .pathcard { border: 1px solid var(--line); border-radius: 10px; padding: 2vh 1.4vw; background: var(--bg-2); }
+  .pathcard h3 { margin-top: 0; }
+  .pathcard .who { font-size: .85rem; color: var(--muted); margin-bottom: 1vh; }
+  .pathcard a.go { display:inline-block; margin-top:1vh; color: var(--green-bright); text-decoration: none; font-weight:600; }
+  @media (max-width: 760px){ .paths { grid-template-columns: 1fr; } h1 { font-size: 1.8rem; } .wrap { padding-bottom: 8vh; } }
+
+  /* ---- table ---- */
+  table { width: 100%; border-collapse: collapse; font-size: .92rem; margin: 1.6vh 0; }
+  th { text-align: left; padding: 1vh .8vw; color: var(--green); border-bottom: 1px solid var(--line); vertical-align: top; }
+  td { padding: 1vh .8vw; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td:first-child { color: var(--text-strong); white-space: nowrap; }
+
+  .divider-line { border: none; border-top: 1px dashed var(--line); margin: 5vh 0 2vh; }
+  .footer { color: var(--muted); font-size: .85rem; margin-top: 4vh; }
+  kbd { background: var(--bg-3); border: 1px solid var(--line); border-radius: 4px; padding: 1px 7px; font-size: .82em; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">Buổi 06 · <span class="accent">Hands-on Lab</span> — Cắm MCP đầu tiên</div>
+  <div class="right">
+    <button class="theme-toggle" id="themeToggle" aria-label="Đổi giao diện">
+      <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <span>Theme</span>
+    </button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="eyebrow">// Hands-on Lab · Buổi 06 — MCP, Integrations &amp; Production Toolchain</div>
+    <h1>Cắm <span class="accent">MCP đầu tiên</span> của bạn vào Claude</h1>
+    <p class="sub">Trong ~15 phút, bạn sẽ kết nối <strong>Filesystem MCP server</strong> (chính chủ Anthropic) vào Claude. Sau đó Claude có thể <strong>đọc, tìm và ghi file</strong> trong một thư mục bạn chỉ định — qua chuẩn MCP. <strong>Không cần viết code.</strong></p>
+    <div class="meta-row">
+      <span class="chip">⏱ ~15 phút</span>
+      <span class="chip b">🟢 Cho người mới — không cần kinh nghiệm</span>
+      <span class="chip o">⌨️ Không cần code</span>
+      <span class="chip">🖥️ Windows / macOS</span>
+    </div>
+  </header>
+
+  <p class="lead">Ở phần Case study (§3) bạn đã thấy <em>build và vận hành</em> một MCP ra production khó thế nào. Lab này đi hướng ngược lại — phần <strong>dễ và phổ biến nhất</strong>: <em>dùng</em> một MCP có sẵn. Đây cũng chính là lifecycle <code>initialize → list → call</code> (slide "Lifecycle") chạy thật trước mắt bạn.</p>
+
+  <div class="toc">
+    <h4>Các bước</h4>
+    <ol>
+      <li><a href="#goal">Mục tiêu và kết quả đạt được</a></li>
+      <li><a href="#prep">Chuẩn bị (3 thứ)</a></li>
+      <li><a href="#folder">Tạo thư mục "sân chơi"</a></li>
+      <li><a href="#connect">Cắm server — chọn 1 trong 2 đường</a></li>
+      <li><a href="#verify">Kiểm tra server đã kết nối</a></li>
+      <li><a href="#play">Thử nghiệm — 3 câu lệnh "wow"</a></li>
+      <li><a href="#concept">Nối lại lý thuyết trong slide</a></li>
+      <li><a href="#safety">An toàn và dọn dẹp</a></li>
+      <li><a href="#trouble">Gỡ rối (Troubleshooting)</a></li>
+      <li><a href="#stretch">Thử thách thêm (tùy chọn)</a></li>
+    </ol>
+  </div>
+
+  <!-- 1 GOAL -->
+  <h2 id="goal"><span class="num">1</span>Mục tiêu và kết quả đạt được</h2>
+  <p>Kết thúc lab, bạn sẽ tự tay làm được điều này — hỏi Claude bằng tiếng Việt và nó thao tác file thật:</p>
+  <div class="codewrap"><pre>Bạn:   Liệt kê các file trong thư mục mcp-lab của tôi.
+Claude: (gọi tool list_directory)  →  note1.md, note2.md
+
+Bạn:   Đọc và tóm tắt tất cả file trong thư mục đó.
+Claude: (gọi tool read_multiple_files)  →  "Hai ghi chú nói về..."
+
+Bạn:   Tạo file summary.md tổng hợp các ghi chú đó.
+Claude: (gọi tool write_file)  →  đã tạo summary.md ✅</pre></div>
+  <div class="note check"><span class="lbl">✅ Thành quả:</span> một Claude có thể "nhìn thấy" và làm việc với thư mục của bạn — đó là MCP đang hoạt động. Bạn cũng sẽ hiểu vì sao <strong>server chỉ được phép đụng đúng thư mục bạn cho phép</strong> (bài học "tool-surface = ranh giới bảo mật" của §4, ở dạng cụ thể nhất).</div>
+
+  <!-- 2 PREP -->
+  <h2 id="prep"><span class="num">2</span>Chuẩn bị — đúng 3 thứ</h2>
+
+  <div class="step">
+    <div class="badge">a</div>
+    <div class="body">
+      <h3>Node.js ≥ 18 (để chạy <code>npx</code>)</h3>
+      <p>Filesystem server chạy bằng <code>npx</code> — công cụ đi kèm Node.js. Mở terminal (Windows: <strong>PowerShell</strong>; macOS: <strong>Terminal</strong>) và kiểm tra:</p>
+      <div class="codewrap"><pre>node --version</pre></div>
+      <div class="note check"><span class="lbl">✅ Mong đợi:</span> in ra <code>v18.x</code> trở lên (ví dụ <code>v20.11.1</code>). Nếu báo "command not found" → bạn chưa có Node.</div>
+      <div class="note tip"><span class="lbl">💡 Chưa có Node?</span> Tải bản <strong>LTS</strong> tại <a href="https://nodejs.org" target="_blank" rel="noopener">nodejs.org</a> → cài như app bình thường (next-next-finish) → <strong>mở lại terminal</strong> → chạy lại lệnh trên.</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="badge">b</div>
+    <div class="body">
+      <h3>Claude Code <em>hoặc</em> Claude Desktop</h3>
+      <p>Chỉ cần <strong>một trong hai</strong>. Bạn sẽ chọn đường tương ứng ở Bước 4.</p>
+      <ul>
+        <li><strong>Claude Code</strong> (công cụ dòng lệnh) — hợp với ai quen terminal. <a href="https://code.claude.com/docs" target="_blank" rel="noopener">code.claude.com/docs</a></li>
+        <li><strong>Claude Desktop</strong> (app máy tính, có giao diện) — hợp với người mới, gần như không cần terminal. <a href="https://claude.ai/download" target="_blank" rel="noopener">claude.ai/download</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="badge">c</div>
+    <div class="body">
+      <h3>~15 phút và một chút tò mò 🙂</h3>
+      <p>Không cần cài gì thêm: <code>npx -y</code> sẽ tự tải Filesystem server lần đầu chạy.</p>
+    </div>
+  </div>
+
+  <!-- 3 FOLDER -->
+  <h2 id="folder"><span class="num">3</span>Tạo thư mục "sân chơi" (sandbox)</h2>
+  <p>Ta sẽ cho Claude quyền truy cập <strong>đúng một thư mục mới, trống</strong> — không phải cả ổ đĩa. Đây là thói quen an toàn quan trọng (xem Bước 8).</p>
+
+  <span class="label-tab">Windows · PowerShell</span>
+  <div class="codewrap"><pre>mkdir $HOME\Documents\mcp-lab
+Set-Content $HOME\Documents\mcp-lab\note1.md "# Ghi chu 1`nMua sua, trung, ca phe cho cuoi tuan."
+Set-Content $HOME\Documents\mcp-lab\note2.md "# Ghi chu 2`nHop team thu Ba. Deadline bao cao thu Sau."</pre></div>
+
+  <span class="label-tab">macOS / Linux · Terminal</span>
+  <div class="codewrap"><pre>mkdir -p ~/Documents/mcp-lab
+echo "# Ghi chu 1\nMua sua, trung, ca phe cho cuoi tuan." > ~/Documents/mcp-lab/note1.md
+echo "# Ghi chu 2\nHop team thu Ba. Deadline bao cao thu Sau." > ~/Documents/mcp-lab/note2.md</pre></div>
+
+  <div class="note tip"><span class="lbl">💡 Không thích gõ lệnh?</span> Cứ mở File Explorer / Finder, tạo thủ công thư mục <code>mcp-lab</code> trong <strong>Documents</strong>, rồi kéo vào đó 1–2 file <code>.txt</code> hoặc <code>.md</code> bất kỳ (ghi chú cũ cũng được). Mục tiêu chỉ là "có vài file để Claude đọc".</div>
+  <div class="note"><span class="lbl blue">ℹ️ Ghi lại đường dẫn đầy đủ</span> của thư mục — bạn sẽ dán nó ở Bước 4. Windows thường là <code>C:\Users\&lt;Tên-bạn&gt;\Documents\mcp-lab</code>; macOS là <code>/Users/&lt;ten-ban&gt;/Documents/mcp-lab</code>.</div>
+
+  <!-- 4 CONNECT -->
+  <h2 id="connect"><span class="num">4</span>Cắm server — chọn <em>một</em> trong hai đường</h2>
+  <div class="paths">
+    <div class="pathcard">
+      <h3>🅰️ Claude Code (CLI)</h3>
+      <div class="who">Cho ai quen dùng terminal · nhanh nhất</div>
+      <a class="go" href="#pathA">↓ Đi tới Đường A</a>
+    </div>
+    <div class="pathcard">
+      <h3>🅱️ Claude Desktop (GUI)</h3>
+      <div class="who">Cho người mới · chỉ sửa 1 file cấu hình</div>
+      <a class="go" href="#pathB">↓ Đi tới Đường B</a>
+    </div>
+  </div>
+
+  <!-- PATH A -->
+  <h3 id="pathA">🅰️ Đường A — Claude Code (CLI)</h3>
+  <p>Một câu lệnh duy nhất. Thay đường dẫn ví dụ bằng <strong>đường dẫn thư mục của bạn</strong> ở Bước 3.</p>
+
+  <span class="label-tab">Windows · PowerShell</span>
+  <div class="codewrap"><pre>claude mcp add --transport stdio filesystem -- npx -y @modelcontextprotocol/server-filesystem C:\Users\Ban\Documents\mcp-lab</pre></div>
+
+  <span class="label-tab">macOS / Linux · Terminal</span>
+  <div class="codewrap"><pre>claude mcp add --transport stdio filesystem -- npx -y @modelcontextprotocol/server-filesystem ~/Documents/mcp-lab</pre></div>
+
+  <div class="note"><span class="lbl blue">ℹ️ Đọc cấu trúc lệnh:</span> mọi <em>tùy chọn</em> (<code>--transport</code>, <code>--scope</code>…) đứng <strong>trước</strong> tên server; dấu <code>--</code> ngăn cách tên với <em>lệnh chạy server</em>. <code>filesystem</code> là tên bạn tự đặt. Mặc định server chỉ áp dụng cho thư mục project hiện tại (<code>--scope local</code>).</div>
+  <div class="note tip"><span class="lbl">💡 Muốn dùng ở mọi project?</span> Thêm <code>--scope user</code> ngay sau <code>add</code>:<br><code>claude mcp add --scope user --transport stdio filesystem -- npx -y @modelcontextprotocol/server-filesystem C:\Users\Ban\Documents\mcp-lab</code></div>
+  <p>👉 Tiếp theo: <a href="#verify">Bước 5 — Kiểm tra</a>.</p>
+
+  <!-- PATH B -->
+  <h3 id="pathB">🅱️ Đường B — Claude Desktop (GUI)</h3>
+  <ol>
+    <li><strong>Mở file cấu hình:</strong> trong Claude Desktop vào <strong>Settings → Developer → Edit Config</strong>. Nút này tạo/mở file <code>claude_desktop_config.json</code>.
+      <div class="note"><span class="lbl blue">ℹ️ Vị trí file</span> (nếu muốn mở tay):<br>• Windows: <code>%APPDATA%\Claude\claude_desktop_config.json</code><br>• macOS: <code>~/Library/Application Support/Claude/claude_desktop_config.json</code></div>
+    </li>
+    <li><strong>Dán nội dung sau</strong> (thay đường dẫn cho đúng máy bạn), rồi <strong>Lưu</strong>:</li>
+  </ol>
+
+  <span class="label-tab">Windows · claude_desktop_config.json</span>
+  <div class="codewrap"><pre>{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "C:\\Users\\Ban\\Documents\\mcp-lab"
+      ]
+    }
+  }
+}</pre></div>
+
+  <span class="label-tab">macOS · claude_desktop_config.json</span>
+  <div class="codewrap"><pre>{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/ban/Documents/mcp-lab"
+      ]
+    }
+  }
+}</pre></div>
+
+  <div class="note warn"><span class="lbl">⚠️ Bẫy đường dẫn Windows:</span> trong JSON, dấu <code>\</code> phải viết đôi thành <code>\\</code> (như trên). Hoặc dùng dấu gạch xuôi cho gọn: <code>"C:/Users/Ban/Documents/mcp-lab"</code>. Luôn dùng <strong>đường dẫn tuyệt đối</strong>, không dùng <code>.\</code> hay <code>~</code> rút gọn trong JSON.</div>
+  <ol start="3">
+    <li><strong>Thoát hẳn</strong> Claude Desktop rồi <strong>mở lại</strong> (đóng cửa sổ thôi là chưa đủ — phải quit hẳn để app đọc lại cấu hình).</li>
+  </ol>
+  <p>👉 Tiếp theo: <a href="#verify">Bước 5 — Kiểm tra</a>.</p>
+
+  <!-- 5 VERIFY -->
+  <h2 id="verify"><span class="num">5</span>Kiểm tra server đã kết nối</h2>
+
+  <h3>Nếu bạn dùng Claude Code</h3>
+  <p>Trong một phiên Claude Code, gõ:</p>
+  <div class="codewrap"><pre>/mcp</pre></div>
+  <div class="note check"><span class="lbl">✅ Mong đợi:</span> thấy <code>filesystem</code> trong danh sách, trạng thái <em>connected</em>, kèm các tool (<code>list_directory</code>, <code>read_text_file</code>, <code>write_file</code>…). Hoặc kiểm tra ngoài phiên bằng:</div>
+  <div class="codewrap"><pre>claude mcp list
+claude mcp get filesystem</pre></div>
+
+  <h3>Nếu bạn dùng Claude Desktop</h3>
+  <p>Sau khi mở lại app, nhìn <strong>góc dưới-phải ô chat</strong>: sẽ có một biểu tượng MCP/công cụ (slider). Bấm vào đó để xem danh sách tool mà <code>filesystem</code> cung cấp.</p>
+  <div class="note check"><span class="lbl">✅ Mong đợi:</span> thấy nhóm tool từ server <code>filesystem</code>. Nếu chưa thấy → xem <a href="#trouble">Gỡ rối</a>.</div>
+  <div class="note"><span class="lbl blue">ℹ️ Đây chính là "list":</span> Claude vừa làm <code>initialize</code> (bắt tay) rồi <code>list</code> (hỏi server có tool gì). Bạn đang nhìn lifecycle MCP chạy thật.</div>
+
+  <!-- 6 PLAY -->
+  <h2 id="play"><span class="num">6</span>Thử nghiệm — 3 câu lệnh "wow"</h2>
+  <p>Hỏi Claude bằng tiếng Việt như bình thường. Khi cần, Claude sẽ tự gọi tool của <code>filesystem</code> (có thể hỏi bạn xác nhận trước khi đọc/ghi — cứ đồng ý).</p>
+
+  <div class="step"><div class="badge">1</div><div class="body">
+    <h3>Liệt kê file</h3>
+    <div class="codewrap"><pre>Liệt kê các file trong thư mục mcp-lab của tôi.</pre></div>
+    <div class="note check"><span class="lbl">✅</span> Claude gọi <code>list_directory</code> và trả về <code>note1.md</code>, <code>note2.md</code>.</div>
+  </div></div>
+
+  <div class="step"><div class="badge">2</div><div class="body">
+    <h3>Đọc và tóm tắt</h3>
+    <div class="codewrap"><pre>Đọc tất cả file trong thư mục mcp-lab và tóm tắt giúp tôi.</pre></div>
+    <div class="note check"><span class="lbl">✅</span> Claude gọi <code>read_text_file</code> / <code>read_multiple_files</code> rồi tóm tắt nội dung 2 ghi chú.</div>
+  </div></div>
+
+  <div class="step"><div class="badge">3</div><div class="body">
+    <h3>Tạo file mới (ghi)</h3>
+    <div class="codewrap"><pre>Tạo file summary.md trong thư mục mcp-lab, tổng hợp tất cả ghi chú thành một danh sách việc cần làm.</pre></div>
+    <div class="note check"><span class="lbl">✅</span> Claude gọi <code>write_file</code>. Mở thư mục <code>mcp-lab</code> → bạn thấy <strong><code>summary.md</code></strong> mới xuất hiện. 🎉 Bạn vừa cho AI "đôi tay" trên thư mục của mình — một cách an toàn, có giới hạn.</div>
+  </div></div>
+
+  <!-- 7 CONCEPT -->
+  <h2 id="concept"><span class="num">7</span>Nối lại lý thuyết trong slide</h2>
+  <p>Những gì vừa xảy ra map thẳng vào các khái niệm Buổi 6:</p>
+  <table>
+    <tr><th>Trong lab này</th><th>Khái niệm MCP (slide)</th></tr>
+    <tr><td><code>/mcp</code> hiện ra danh sách tool</td><td><strong>Lifecycle</strong>: initialize → <strong>list</strong> → call</td></tr>
+    <tr><td><code>list_directory</code>, <code>read_text_file</code>, <code>write_file</code></td><td><strong>Tools</strong> — primitive #1 (model chủ động gọi)</td></tr>
+    <tr><td><code>npx ... server-filesystem</code> chạy nền</td><td><strong>Transport stdio</strong> — server là tiến trình con</td></tr>
+    <tr><td>Gói <code>@modelcontextprotocol/server-filesystem</code></td><td><strong>Server</strong> — do người khác build; bạn chỉ <em>dùng</em></td></tr>
+    <tr><td>Server chỉ đụng được thư mục bạn liệt kê</td><td><strong>Tool-surface = ranh giới bảo mật</strong> (§4)</td></tr>
+  </table>
+  <div class="note tip"><span class="lbl">💡 Liên hệ Case study (§3):</span> bạn vừa <em>dùng</em> một MCP trong 5 phút. Nhớ lại §3 — để <em>build</em> và <em>vận hành</em> một MCP như Blockify ra production còn phải lo transport, secret, schema, reliability, phân phối. <strong>Dùng thì dễ; làm cho người khác dùng an toàn mới khó.</strong></div>
+
+  <!-- 8 SAFETY -->
+  <h2 id="safety"><span class="num">8</span>An toàn và dọn dẹp</h2>
+  <div class="note danger"><span class="lbl">🔒 Vì sao chỉ trỏ vào 1 thư mục sandbox:</span> Filesystem server có cả tool <strong>ghi/xoá/di chuyển</strong> file. Nó <strong>chỉ</strong> được phép thao tác trong những thư mục bạn liệt kê khi khởi động — <em>không</em> đụng được phần còn lại của máy. Vì vậy: đừng trỏ vào cả ổ <code>C:\</code>, thư mục Home, hay thư mục chứa secret/khóa. Cho ít quyền nhất có thể = <strong>least privilege</strong> (bài học B4/§4).</div>
+
+  <h3>Gỡ server khi xong</h3>
+  <p><strong>Claude Code:</strong></p>
+  <div class="codewrap"><pre>claude mcp remove filesystem</pre></div>
+  <p><strong>Claude Desktop:</strong> mở lại <code>claude_desktop_config.json</code>, xoá khối <code>"filesystem": { ... }</code> (hoặc cả <code>mcpServers</code> nếu chỉ có nó), lưu, rồi quit và mở lại app.</p>
+
+  <!-- 9 TROUBLE -->
+  <h2 id="trouble"><span class="num">9</span>Gỡ rối (Troubleshooting)</h2>
+  <table>
+    <tr><th>Triệu chứng</th><th>Nguyên nhân và cách xử lý</th></tr>
+    <tr><td>Không thấy server / tool sau khi cài</td><td>Claude Desktop: bạn <strong>chưa quit hẳn</strong> rồi mở lại. Claude Code: chạy <code>claude mcp list</code> để xác nhận đã add đúng.</td></tr>
+    <tr><td><code>npx</code> báo "command not found" / spawn lỗi</td><td>Chưa cài Node, hoặc terminal chưa nạp PATH mới. Chạy <code>node --version</code>; cài lại Node LTS; <strong>mở terminal/app mới</strong>.</td></tr>
+    <tr><td>Windows: Desktop báo lỗi spawn <code>npx</code> (ENOENT)</td><td>Một số máy Windows cần gọi qua <code>cmd</code>. Thử đổi trong JSON:<br><code>"command": "cmd"</code>, <code>"args": ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem", "C:\\...\\mcp-lab"]</code></td></tr>
+    <tr><td>Server chạy nhưng không có tool / "access denied"</td><td>Sai đường dẫn, hoặc bạn không có quyền đọc/ghi thư mục đó. Dùng <strong>đường dẫn tuyệt đối</strong>, đúng thật, và là thư mục của chính bạn.</td></tr>
+    <tr><td>JSON không nạp được</td><td>Sai cú pháp (thừa dấu phẩy, thiếu ngoặc). Dán vào <a href="https://jsonlint.com" target="_blank" rel="noopener">jsonlint.com</a> để soi. Nhớ <code>\\</code> cho đường dẫn Windows.</td></tr>
+    <tr><td>Muốn xem log để chẩn đoán</td><td>Desktop · Windows: <code>%APPDATA%\Claude\logs\mcp*.log</code> · macOS: <code>~/Library/Logs/Claude/mcp*.log</code></td></tr>
+    <tr><td>Nghi server tự nó hỏng</td><td>Chạy thẳng để xem nó khởi động không:<br><code>npx -y @modelcontextprotocol/server-filesystem C:\Users\Ban\Documents\mcp-lab</code></td></tr>
+  </table>
+
+  <!-- 10 STRETCH -->
+  <h2 id="stretch"><span class="num">10</span>Thử thách thêm (tùy chọn)</h2>
+  <ul>
+    <li><strong>Nhiều thư mục:</strong> thêm vài đường dẫn nữa vào cuối lệnh/args — server cho phép một danh sách thư mục: <code>... server-filesystem DIR1 DIR2 DIR3</code>.</li>
+    <li><strong>Hỏi tìm kiếm:</strong> "Tìm trong mcp-lab file nào có chữ <em>deadline</em>" → Claude dùng <code>search_files</code>.</li>
+    <li><strong>Cây thư mục:</strong> "Vẽ cây thư mục mcp-lab" → <code>directory_tree</code>.</li>
+    <li><strong>So sánh với §3:</strong> đọc lại repo <code>hands-on/blockify-ip-mcp/</code> — đó là một MCP <em>bạn build</em>, khác hẳn việc chỉ <em>cắm</em> một server có sẵn như lab này.</li>
+  </ul>
+
+  <hr class="divider-line">
+  <div class="note tip"><span class="lbl">🎯 Bạn vừa hoàn thành:</span> kết nối &amp; sử dụng MCP server đầu tiên, thấy lifecycle initialize→list→call chạy thật, và hiểu vì sao tool-surface là ranh giới bảo mật. Tiếp theo trong buổi: §4 (sự cố bảo mật MCP thật) → §5 (model và cost) → §6–§7 (observability và memory).</div>
+
+  <p class="footer">Khái niệm đã chạm: dùng MCP có sẵn · lifecycle · tools · transport stdio · least-privilege (tool-surface = security boundary). · Lệnh/cấu hình kiểm chứng theo tài liệu chính thức <em>modelcontextprotocol.io</em> và <em>code.claude.com/docs</em> (truy cập 06/2026).</p>
+
+</div>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var forced = new URLSearchParams(location.search).get('theme');
+    var saved = null; try { saved = localStorage.getItem('slide-theme'); } catch (e) {}
+    if (forced === 'light' || forced === 'dark') root.setAttribute('data-theme', forced);
+    else if (saved === 'light' || saved === 'dark') root.setAttribute('data-theme', saved);
+    document.getElementById('themeToggle').addEventListener('click', function () {
+      var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('slide-theme', next); } catch (e) {}
+    });
+
+    // Copy buttons for every code block
+    document.querySelectorAll('.codewrap').forEach(function (wrap) {
+      var pre = wrap.querySelector('pre');
+      if (!pre) return;
+      var btn = document.createElement('button');
+      btn.className = 'copy'; btn.type = 'button'; btn.textContent = 'Copy';
+      btn.addEventListener('click', function () {
+        var text = pre.innerText;
+        navigator.clipboard.writeText(text).then(function () {
+          btn.textContent = '✓ Đã chép'; btn.classList.add('ok');
+          setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('ok'); }, 1500);
+        }).catch(function () { btn.textContent = 'Lỗi'; });
+      });
+      wrap.appendChild(btn);
+    });
+  })();
+</script>
+</body>
+</html>

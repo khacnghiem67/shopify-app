@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BUỔI 7: Harness Design, Team Adoption &amp; Cross-Model</title>
+<style>
+  :root{
+    --bg:#0b1020; --bg2:#121a33; --panel:#161f3d; --panel2:#1b2647;
+    --ink:#e8edff; --muted:#9aa6c9; --line:#2a3766;
+    --accent:#8b6cff; --accent2:#46e0c8; --accent3:#5aa6ff;
+    --code-bg:#0a0f22; --ok:#46e0c8; --warn:#ffce6b;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:radial-gradient(1200px 800px at 15% -10%,#1c2550 0%,transparent 55%),
+               radial-gradient(1000px 700px at 110% 10%,#27325f 0%,transparent 50%),
+               var(--bg);
+    color:var(--ink); overflow:hidden;
+  }
+  .deck{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:48px 56px 84px;}
+  .slide{
+    display:none; width:100%; max-width:1180px; max-height:100%;
+    overflow:auto; animation:fade .35s ease;
+  }
+  .slide.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+  .slide::-webkit-scrollbar{width:9px;height:9px;}
+  .slide::-webkit-scrollbar-thumb{background:#33406f;border-radius:6px;}
+
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--accent2);font-weight:700;margin-bottom:14px;
+    border:1px solid var(--line);padding:5px 12px;border-radius:999px;background:rgba(70,224,200,.06);}
+  h1{font-size:48px;line-height:1.08;margin:.1em 0 .25em;font-weight:800;letter-spacing:-.02em;
+    background:linear-gradient(90deg,#fff,#bcd0ff 55%,#8b6cff);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  h2{font-size:34px;line-height:1.12;margin:0 0 .4em;font-weight:800;letter-spacing:-.01em;}
+  h3{font-size:20px;margin:0 0 .3em;font-weight:700;color:#dbe4ff;}
+  p{font-size:18px;line-height:1.55;color:#d4dcf6;margin:.4em 0;}
+  .lead{font-size:21px;color:var(--muted);}
+  ul{margin:.3em 0;padding-left:1.2em;}
+  li{font-size:17.5px;line-height:1.5;margin:.42em 0;color:#d4dcf6;}
+  li::marker{color:var(--accent);}
+  strong{color:#fff;}
+  .muted{color:var(--muted);}
+
+  .grid{display:grid;gap:18px;}
+  .g2{grid-template-columns:1fr 1fr;}
+  .g3{grid-template-columns:repeat(3,1fr);}
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
+    border-radius:16px;padding:20px 22px;}
+  .card.tight{padding:16px 18px;}
+  .pill{display:inline-block;font-size:12.5px;font-weight:700;padding:3px 10px;border-radius:999px;
+    background:rgba(139,108,255,.16);color:#c8bcff;border:1px solid #463a85;}
+  .pill.env{background:rgba(90,166,255,.14);color:#aac8ff;border-color:#2f4a7d;}
+  .pill.fb{background:rgba(70,224,200,.14);color:#9af0e0;border-color:#1f6b5e;}
+  .pill.state{background:rgba(255,206,107,.14);color:#ffe0a3;border-color:#7d6630;}
+  .pill.life{background:rgba(255,140,180,.14);color:#ffc0d4;border-color:#7d3a55;}
+  .pill.guide{background:rgba(139,108,255,.16);color:#c8bcff;border-color:#463a85;}
+
+  /* code block */
+  .codewrap{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--code-bg);margin:.6em 0;}
+  .codehead{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:#0e152e;border-bottom:1px solid var(--line);padding:8px 12px;}
+  .codepath{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;color:#9fb2e8;
+    display:flex;align-items:center;gap:8px;}
+  .dot{width:11px;height:11px;border-radius:50%;background:#ff5f57;box-shadow:18px 0 #febc2e,36px 0 #28c840;margin-right:34px;}
+  .copybtn{font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;color:#dfe7ff;
+    background:#27326a;border:1px solid #3a478a;border-radius:8px;padding:5px 12px;}
+  .copybtn:hover{background:#34419a;}
+  .copybtn.ok{background:#1f6b5e;border-color:#2da38c;color:#d6fff5;}
+  pre{margin:0;padding:14px 16px;max-height:48vh;overflow:auto;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.7px;line-height:1.55;color:#d7e0ff;}
+  pre::-webkit-scrollbar{width:10px;height:10px;}
+  pre::-webkit-scrollbar-thumb{background:#2c386b;border-radius:6px;}
+  pre.sm{font-size:12px;max-height:40vh;}
+  .cmd{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13.5px;background:#0e152e;
+    border:1px solid var(--line);border-radius:8px;padding:8px 12px;color:#bfe6ff;display:inline-block;}
+  code.inl{font-family:ui-monospace,Menlo,Consolas,monospace;background:#0e152e;border:1px solid var(--line);
+    border-radius:6px;padding:1px 6px;font-size:.92em;color:#bfe6ff;}
+
+  /* title slide */
+  .title-slide{text-align:left;}
+  .title-slide h1{font-size:58px;}
+  .author{margin-top:26px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;}
+  .badge{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:12px;padding:10px 16px;font-size:15px;}
+
+  /* layered rings (evolution) */
+  .rings{position:relative;width:420px;height:300px;margin:6px auto;}
+  .ring{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:18px;
+    display:flex;align-items:flex-start;justify-content:center;padding-top:12px;font-weight:700;}
+  .r1{width:420px;height:300px;background:rgba(139,108,255,.10);border:1.5px solid #4a3e92;color:#c9bcff;}
+  .r2{width:330px;height:230px;background:rgba(90,166,255,.10);border:1.5px solid #345385;color:#aac8ff;}
+  .r3{width:240px;height:160px;background:rgba(70,224,200,.10);border:1.5px solid #1f6b5e;color:#9af0e0;}
+  .r4{width:150px;height:92px;background:rgba(255,206,107,.14);border:1.5px solid #7d6630;color:#ffe0a3;
+    align-items:center;padding-top:0;}
+  .ring span{font-size:13.5px;}
+
+  /* subsystem table */
+  table{width:100%;border-collapse:collapse;font-size:16px;}
+  th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{color:var(--accent2);font-size:13px;letter-spacing:.05em;text-transform:uppercase;}
+  td.art{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13.5px;color:#bfe6ff;}
+
+  /* bars (ablation) */
+  .bars{display:flex;flex-direction:column;gap:14px;margin-top:8px;}
+  .bar-row{display:grid;grid-template-columns:230px 1fr 56px;align-items:center;gap:14px;}
+  .bar-label{font-size:15px;color:#d4dcf6;}
+  .bar-track{background:#0e152e;border:1px solid var(--line);border-radius:10px;height:26px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:9px 0 0 9px;background:linear-gradient(90deg,#5aa6ff,#8b6cff,#46e0c8);
+    display:flex;align-items:center;}
+  .bar-pct{font-weight:800;font-size:16px;text-align:right;color:#bcd0ff;}
+
+  /* dag */
+  .dag{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  .node{background:#1a2348;border:1px solid #39477f;border-radius:9px;padding:7px 11px;color:#cfe;}
+  .node.done{background:#143f37;border-color:#2da38c;color:#bff5e8;}
+  .arrow{color:#6c7bb5;}
+
+  /* steps */
+  .step{border-left:3px solid var(--accent);padding:6px 0 6px 16px;margin:10px 0;}
+  .stepnum{display:inline-flex;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#1a1330;
+    align-items:center;justify-content:center;font-weight:800;font-size:13px;margin-right:8px;}
+
+  .evi-out{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.6px;line-height:1.5;color:#c9ffe9;
+    padding:10px 12px;white-space:pre-wrap;max-height:30vh;overflow:auto;}
+
+  /* footer / nav */
+  .chrome{position:fixed;left:0;right:0;bottom:0;height:60px;display:flex;align-items:center;
+    gap:14px;padding:0 24px;background:linear-gradient(0deg,rgba(8,12,26,.96),rgba(8,12,26,.55));
+    border-top:1px solid var(--line);backdrop-filter:blur(6px);z-index:20;}
+  .progress{position:fixed;left:0;top:0;height:4px;background:linear-gradient(90deg,#5aa6ff,#8b6cff,#46e0c8);
+    z-index:30;transition:width .3s ease;width:0;}
+  .nbtn{font:inherit;font-weight:700;font-size:14px;cursor:pointer;color:#e8edff;background:#222d59;
+    border:1px solid #38468a;border-radius:9px;padding:8px 14px;}
+  .nbtn:hover{background:#2f3c75;}
+  .nbtn:disabled{opacity:.4;cursor:default;}
+  .counter{font-variant-numeric:tabular-nums;font-weight:700;color:#cdd8ff;font-size:14px;min-width:64px;text-align:center;}
+  .deck-title{font-size:13px;color:var(--muted);margin-left:auto;letter-spacing:.04em;}
+  .hint{font-size:12px;color:#6f7caf;}
+  .tag-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+  .why{background:rgba(70,224,200,.06);border:1px solid #1f6b5e;border-radius:12px;padding:12px 16px;margin:.5em 0;}
+  .why h3{color:var(--accent2);}
+  .note{background:rgba(255,206,107,.07);border:1px solid #7d6630;border-radius:12px;padding:12px 16px;}
+  .note h3{color:var(--warn);}
+  .kpill{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:#0e152e;border:1px solid var(--line);
+    padding:2px 7px;border-radius:6px;color:#9fb2e8;}
+  .tree{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;line-height:1.6;color:#cfe;
+    background:var(--code-bg);border:1px solid var(--line);border-radius:12px;padding:16px 18px;white-space:pre;overflow:auto;}
+  @media (max-width:820px){
+    .deck{padding:20px 18px 78px;}
+    h1{font-size:34px;}.title-slide h1{font-size:38px;}h2{font-size:26px;}
+    .g2,.g3{grid-template-columns:1fr;}
+    .bar-row{grid-template-columns:130px 1fr 44px;}
+    .rings{transform:scale(.8);}
+  }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="deck" id="deck"></div>
+
+<div class="chrome">
+  <button class="nbtn" id="prev">‹ Prev</button>
+  <button class="nbtn" id="next">Next ›</button>
+  <span class="counter" id="counter">1 / 1</span>
+  <span class="hint">← → / Space điều hướng · Home/End nhảy đầu-cuối</span>
+  <span class="deck-title">Buổi 7 · Harness Design — Đỗ Ngọc Quang · AI Engineering</span>
+</div>
+
+<script>
+/* ---------- helpers ---------- */
+const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+let copyId = 0;
+function codeBlock(path, content){
+  const id = "code-"+(copyId++);
+  return `<div class="codewrap">
+    <div class="codehead">
+      <span class="codepath"><span class="dot"></span>${esc(path)}</span>
+      <button class="copybtn" data-target="${id}">Copy</button>
+    </div>
+    <pre id="${id}"><code>${esc(content)}</code></pre>
+  </div>`;
+}
+
+/* ---------- harness file contents ---------- */
+const F = {};
+F["init.sh"] = `#!/usr/bin/env bash
+# init.sh — Phản hồi (Feedback) + Môi trường: cài đặt & verify toàn bộ từ checkout sạch.
+# Phải khớp 100% với scripts trong package.json gốc.
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
+cd "$ROOT_DIR"
+
+bold() { printf '\\033[1m%s\\033[0m\\n' "$1"; }
+step() { printf '\\n\\033[1;34m==> %s\\033[0m\\n' "$1"; }
+
+# ---------------------------------------------------------------------------
+step "1/9 Kiểm tra Node 20"
+if ! command -v node >/dev/null 2>&1; then
+  echo "Lỗi: chưa có Node. Cài Node 20 (xem .nvmrc) rồi chạy lại." >&2
+  exit 1
+fi
+NODE_MAJOR="$(node -p 'process.versions.node.split(".")[0]')"
+if [ "$NODE_MAJOR" != "20" ]; then
+  echo "Lỗi: cần Node 20 (đang dùng $(node -v)). Chạy: nvm use" >&2
+  exit 1
+fi
+echo "Node $(node -v) OK"
+
+# ---------------------------------------------------------------------------
+step "2/9 Chuẩn bị .env"
+if [ ! -f .env ]; then
+  cp .env.example .env
+  echo "Đã tạo .env từ .env.example"
+else
+  echo ".env đã tồn tại — giữ nguyên"
+fi
+
+# Nạp .env vào môi trường để các bước sau dùng đúng cấu hình thật
+# (DB_HOST/DB_PORT/DB_USER/DB_PASS/DB_NAME) — khớp AGENTS.md/ARCHITECTURE.md.
+set -a
+# shellcheck disable=SC1091
+. ./.env
+set +a
+
+# ---------------------------------------------------------------------------
+step "3/9 npm install (workspaces)"
+npm install
+
+# ---------------------------------------------------------------------------
+step "4/9 npm run db:up (MySQL 8 qua docker-compose)"
+npm run db:up
+
+# ---------------------------------------------------------------------------
+step "5/9 Chờ MySQL healthy"
+# Probe khớp healthcheck trong docker-compose.yml (dùng -u hr -phr_pass),
+# KHÔNG dùng root mặc định (sẽ Access denied vì MYSQL_ROOT_PASSWORD=hr_root_pass).
+DB_HOST="\${DB_HOST:-127.0.0.1}"
+DB_PORT="\${DB_PORT:-3306}"
+DB_USER="\${DB_USER:-hr}"
+DB_PASS="\${DB_PASS:-hr_pass}"
+ATTEMPTS=60
+until docker compose exec -T db \\
+        mysqladmin ping -h 127.0.0.1 -u"$DB_USER" -p"$DB_PASS" --silent >/dev/null 2>&1; do
+  ATTEMPTS=$((ATTEMPTS - 1))
+  if [ "$ATTEMPTS" -le 0 ]; then
+    echo "Lỗi: MySQL không healthy sau khi chờ. Xem: docker compose logs db" >&2
+    exit 1
+  fi
+  printf '.'
+  sleep 2
+done
+echo ""
+echo "MySQL healthy (db=\${DB_NAME:-hr}, host=\${DB_HOST}, port=\${DB_PORT}, user=\${DB_USER})"
+
+# ---------------------------------------------------------------------------
+step "6/9 npm run migration:run (TypeORM)"
+npm run migration:run
+
+# ---------------------------------------------------------------------------
+step "7/9 npm run check (typecheck api + web)"
+npm run check
+
+step "8/9 npm run lint && npm run test (jest + vitest)"
+npm run lint
+npm run test
+
+step "9/9 npm run build (api + web)"
+npm run build
+
+# ---------------------------------------------------------------------------
+bold ""
+bold "================ HARNESS XANH ================"
+cat <<'EOF'
+
+Môi trường đã sẵn sàng và clean state.
+
+Bước tiếp theo:
+  1. Mở .claude/feature_list.json — chọn ĐÚNG 1 feature status "not-started"
+     mà mọi dependency đã "done" (bắt đầu: feat-001).
+  2. Đặt feature đó sang "in-progress".
+  3. Làm feature. Sau mỗi thay đổi đáng kể, chạy lại lệnh verify liên quan:
+       npm run check && npm run lint && npm run test && npm run build
+  4. Khi xong: chạy lại \`bash init.sh\`, dán output vào trường "evidence".
+  5. Cập nhật feature_list.json (done), progress.md, session-handoff.md.
+
+Dev song song:  npm run dev
+EOF`;
+
+F["package.json"] = `{
+  "name": "quan-ly-nhan-su",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Trang quản lý nhân viên — monorepo npm workspaces (NestJS + React).",
+  "engines": {
+    "node": ">=20 <21"
+  },
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c blue,green \\"npm:dev --workspace=apps/api\\" \\"npm:dev --workspace=apps/web\\"",
+    "check": "npm run check --workspace=apps/api && npm run check --workspace=apps/web",
+    "lint": "npm run lint --workspace=apps/api && npm run lint --workspace=apps/web",
+    "test": "npm run test --workspace=apps/api && npm run test --workspace=apps/web",
+    "build": "npm run build --workspace=apps/api && npm run build --workspace=apps/web",
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down",
+    "migration:run": "npm run migration:run --workspace=apps/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}`;
+
+F["docker-compose.yml"] = `services:
+  db:
+    image: mysql:8.0
+    container_name: qlns-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: hr
+      MYSQL_USER: hr
+      MYSQL_PASSWORD: hr_pass
+      MYSQL_ROOT_PASSWORD: hr_root_pass
+    ports:
+      # Cổng host có thể override qua DB_PORT trong .env (vd 3307) nếu 3306 bị chiếm.
+      # Cổng trong container luôn là 3306.
+      - "\${DB_PORT:-3306}:3306"
+    volumes:
+      - qlns_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "hr", "-phr_pass"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+volumes:
+  qlns_mysql_data:`;
+
+F[".nvmrc"] = `20`;
+
+F[".env.example"] = `# Sao chép thành .env (KHÔNG commit .env). Giá trị khớp docker-compose.yml.
+# --- Database (TypeORM DataSource đọc các biến này; init.sh nạp .env trước khi chờ DB) ---
+DB_HOST=127.0.0.1
+# DB_PORT vừa là cổng TypeORM kết nối, vừa override cổng host docker-compose.
+# Nếu 3306 bị MySQL cục bộ chiếm: đổi sang 3307 (cả host docker + TypeORM dùng chung biến này).
+DB_PORT=3306
+DB_USER=hr
+DB_PASS=hr_pass
+DB_NAME=hr
+
+# --- Auth ---
+JWT_SECRET=doi_chuoi_bi_mat_nay_trong_moi_truong_that`;
+
+F[".gitignore"] = `node_modules/
+dist/
+build/
+coverage/
+.env
+.env.local
+*.log
+.DS_Store`;
+
+F["feature_list.json"] = `{
+  "project": "quan-ly-nhan-su",
+  "description": "Trang quản lý nhân viên: CRUD nhân viên theo phòng ban, auth admin. Một feature active tại một thời điểm; tôn trọng DAG dependencies.",
+  "statusLegend": ["not-started", "in-progress", "done", "blocked"],
+  "features": [
+    {
+      "id": "feat-001",
+      "name": "Project setup",
+      "description": "Khởi tạo monorepo npm workspaces (apps/api, apps/web), cài deps, docker MySQL chạy. init.sh xanh từ checkout sạch.",
+      "dependencies": [],
+      "status": "not-started",
+      "evidence": ""
+    },
+    {
+      "id": "feat-002",
+      "name": "Kết nối DB + cấu hình TypeORM",
+      "description": "Cấu hình TypeORM DataSource đọc env (DB_HOST/PORT/USER/PASS/NAME), kết nối MySQL 8 thành công, sẵn sàng cho migration.",
+      "dependencies": ["feat-001"],
+      "status": "not-started",
+      "evidence": ""
+    },
+    {
+      "id": "feat-003",
+      "name": "Entity PhongBan + migration",
+      "description": "Entity PhongBan (Department) và migration tạo bảng phong_ban.",
+      "dependencies": ["feat-002"],
+      "status": "not-started",
+      "evidence": ""
+    },
+    {
+      "id": "feat-004",
+      "name": "Entity NhanVien + quan hệ + migration",
+      "description": "Entity NhanVien (Employee) với quan hệ ManyToOne tới PhongBan; migration tạo bảng nhan_vien và khóa ngoại.",
+      "dependencies": ["feat-003"],
+      "status": "not-started",
+      "evidence": ""
+    },
+    {
+      "id": "feat-005",
+      "name": "API CRUD Nhân viên",
+      "description": "NestJS module nhan-vien: controller + service + DTO + validation (class-validator). Đầy đủ list/get/create/update/delete.",
+      "dependencies": ["feat-004"],
+      "status": "not-started",
+      "evidence": ""
+    },
+    {
+      "id": "feat-006",
+      "name": "Auth JWT",
+      "description": "Đăng nhập admin, phát JWT, guard bảo vệ các route ghi (create/update/delete).",
+      "dependencies": ["feat-005"],
+      "status": "not-started",
+      "evidence": ""
+    },
+    {
+      "id": "feat-007",
+      "name": "Frontend React danh sách + form",
+      "description": "React + Vite: trang danh sách nhân viên và form thêm/sửa, gọi API CRUD.",
+      "dependencies": ["feat-005"],
+      "status": "not-started",
+      "evidence": ""
+    },
+    {
+      "id": "feat-008",
+      "name": "Kiểm thử E2E",
+      "description": "E2E: đăng nhập admin, tạo nhân viên qua form, kiểm tra hiển thị trong danh sách. Lưu bằng chứng.",
+      "dependencies": ["feat-006", "feat-007"],
+      "status": "not-started",
+      "evidence": ""
+    },
+    {
+      "id": "feat-009",
+      "name": "Dọn dẹp & handoff",
+      "description": "Cập nhật progress.md, feature_list.json, session-handoff.md; đảm bảo clean state, init.sh xanh.",
+      "dependencies": ["feat-008"],
+      "status": "not-started",
+      "evidence": ""
+    }
+  ]
+}`;
+
+F["progress.md"] = `# Progress — Quản lý nhân viên
+
+> Nhật ký phiên. Cập nhật cuối mỗi phiên. Nguồn sự thật về scope là \`.claude/feature_list.json\`; file này là dòng thời gian con người đọc.
+
+## Trạng thái hiện tại
+- **Feature active**: \`feat-001\` Project setup (\`in-progress\`).
+- **Đã done**: (chưa có)
+- **Tiếp theo**: \`feat-002\` Kết nối DB + cấu hình TypeORM (chờ feat-001 done).
+
+## Blockers
+- (chưa có)
+
+## Nhật ký phiên
+
+### Phiên 0 — Khởi tạo harness (2026-06-24)
+- **Done**: dựng bộ harness (AGENTS.md, CLAUDE.md, feature_list.json, init.sh, docker-compose.yml, .nvmrc, .env.example, docs/).
+- **In-progress**: \`feat-001\` Project setup — cần tạo \`package.json\` của \`apps/api\` và \`apps/web\`, cài deps, xác minh \`bash init.sh\` xanh từ checkout sạch.
+- **Next**: hoàn tất feat-001 → chạy \`bash init.sh\` → dán output vào \`evidence\` của feat-001 → chuyển feat-002.
+- **Blockers**: none.
+- **Evidence**: (chưa có — chạy \`bash init.sh\` và dán output)
+
+## Cách dùng file này
+Mỗi phiên ghi một mục \`### Phiên N\` gồm: Done / In-progress / Next / Blockers / Evidence (output lệnh verify thật).`;
+
+F["session-handoff.md"] = `# Session Handoff — Quản lý nhân viên
+
+> Điền cuối mỗi phiên để phiên sau (người hoặc agent) khởi động lại được ngay bằng \`bash init.sh\`. Để lại clean state.
+
+## Khởi động lại nhanh
+\`\`\`bash
+nvm use
+cp -n .env.example .env
+bash init.sh
+\`\`\`
+Đọc \`AGENTS.md\` (nguồn sự thật) → \`.claude/feature_list.json\` → \`progress.md\`.
+
+## Bàn giao phiên gần nhất
+- **Ngày**: 2026-06-24
+- **Feature đang active**: \`feat-001\` Project setup (\`in-progress\`)
+- **Việc đã hoàn tất phiên này**: dựng bộ harness đầy đủ (Hướng dẫn / Công cụ / Môi trường / Trạng thái / Phản hồi / Vòng đời).
+- **Việc đang dở**: tạo \`package.json\` cho \`apps/api\` + \`apps/web\`, cài deps, xác minh \`bash init.sh\` xanh từ checkout sạch.
+- **Việc tiếp theo (đề xuất)**: hoàn tất feat-001 → chạy \`bash init.sh\` → dán evidence → chuyển \`feat-002\` (Kết nối DB + TypeORM).
+- **Blockers**: none.
+- **Trạng thái verify cuối**: chưa chạy (apps chưa có package.json). Mong đợi sau feat-001: tất cả lệnh ở AGENTS.md mục 6 xanh.
+- **Clean state?**: harness đã commit; không có thay đổi chưa lưu ngoài các file feature đang làm.
+
+## Checklist trước khi rời phiên
+- [ ] \`feature_list.json\` phản ánh đúng status thật (1 feature in-progress hoặc 0).
+- [ ] \`evidence\` của feature vừa done có output lệnh verify thật.
+- [ ] \`progress.md\` có mục phiên mới.
+- [ ] Không còn thay đổi rác; \`bash init.sh\` chạy lại được.
+- [ ] \`.env\` KHÔNG bị commit.`;
+
+F["CLAUDE.md"] = `# CLAUDE.md
+
+**Đọc \`AGENTS.md\` — đó là nguồn sự thật (system of record).** File này dành riêng cho Claude Code; \`AGENTS.md\` dùng chung đa-model (Codex/Cursor/agent khác). Đừng để hai file mâu thuẫn: mọi quy tắc, lệnh, định nghĩa done đều nằm trong \`AGENTS.md\`.
+
+## Bất biến riêng cho Claude Code
+- Trước khi làm: đọc \`AGENTS.md\` (mục 3, 4, 6, 7), \`.claude/feature_list.json\`, \`progress.md\`.
+- Chỉ 1 feature \`in-progress\` tại một thời điểm; tôn trọng DAG dependencies.
+- Luôn chạy lệnh verify thật và dán output vào \`evidence\` trước khi tuyên bố done — KHÔNG suy đoán kết quả.
+- Dùng đường dẫn tuyệt đối khi thao tác file. Không commit \`.env\`.
+- Kết thúc phiên: cập nhật \`progress.md\` + \`session-handoff.md\`, để clean state cho \`bash init.sh\`.
+
+> Mẹo team: giữ AGENTS.md là nguồn duy nhất; có thể thay file này bằng symlink \`CLAUDE.md -> AGENTS.md\` để 1 harness chạy nhiều model.`;
+
+F["AGENTS.md"] = `# Quản lý nhân viên — AGENTS.md
+
+> File NÀY là nguồn sự thật (system of record) dùng chung cho mọi agent (Codex, Cursor, Claude Code...). Repo chính là spec: thứ gì không nằm trong repo coi như không tồn tại. Đây là BẢN ĐỒ, không phải cẩm nang.
+
+## 1. Dự án là gì
+Trang quản lý nhân viên nội bộ của công ty: CRUD nhân viên theo phòng ban, có đăng nhập admin. Chi tiết sản phẩm: \`docs/PRODUCT.md\`. Kiến trúc: \`docs/ARCHITECTURE.md\`.
+
+## 2. Tech stack (CỐ ĐỊNH — không tự đổi)
+- Monorepo **npm workspaces**, gốc \`quan-ly-nhan-su/\`, workspaces \`apps/*\`.
+- \`apps/api\`: **NestJS 10 + TypeORM + MySQL 8**. Test: **Jest**. Migration: **TypeORM CLI**.
+- \`apps/web\`: **React 18 + Vite + TypeScript**. Test: **Vitest**.
+- DB: **MySQL 8** qua docker-compose (service \`db\`, port \`3306\`, db \`hr\`, user \`hr\`, pass \`hr_pass\`).
+- Node **20** (xem \`.nvmrc\`).
+
+## 3. Khởi động (chạy đúng 1 lệnh từ checkout sạch)
+\`\`\`bash
+nvm use            # hoặc đảm bảo Node 20
+cp .env.example .env
+bash init.sh       # cài + verify toàn bộ, để lại clean state
+\`\`\`
+\`init.sh\` chạy theo thứ tự: kiểm tra Node 20 → tạo & **nạp \`.env\`** → \`npm install\` → \`npm run db:up\` → chờ MySQL healthy → \`npm run migration:run\` → \`npm run check\` → \`npm run lint\` → \`npm run test\` → \`npm run build\`. Xanh hết = môi trường sẵn sàng.
+
+## 4. Vòng làm việc mỗi phiên (act → observe → feedback)
+1. Đọc \`.claude/feature_list.json\` — chọn **ĐÚNG 1** feature \`status: "not-started"\` mà **mọi dependency đã \`done\`**. Chỉ 1 feature active tại một thời điểm.
+2. Đọc \`progress.md\` để biết phiên trước để lại gì.
+3. Đặt feature đó sang \`in-progress\` trong \`feature_list.json\`.
+4. Làm. Sau mỗi thay đổi đáng kể, chạy lệnh verify liên quan (mục 6).
+5. Khi xong: chạy lại **toàn bộ** verify, dán bằng chứng vào trường \`evidence\` của feature.
+6. Cập nhật \`feature_list.json\` (\`done\`), \`progress.md\`, \`session-handoff.md\` để phiên sau chạy \`init.sh\` là tiếp tục được.
+
+## 5. Scope & thứ tự feature
+Nguồn: \`.claude/feature_list.json\` (feat-001 → feat-009). DAG dependencies phải hợp lệ; không nhảy cóc qua dependency chưa \`done\`.
+
+## 6. Lệnh xác minh (chạy từ gốc repo)
+| Mục đích | Lệnh |
+|---|---|
+| Bật MySQL | \`npm run db:up\` |
+| Chạy migration | \`npm run migration:run\` |
+| Typecheck (api + web) | \`npm run check\` |
+| Lint (api + web) | \`npm run lint\` |
+| Test (jest + vitest) | \`npm run test\` |
+| Build (api + web) | \`npm run build\` |
+| Dev song song | \`npm run dev\` |
+| Toàn bộ pipeline | \`bash init.sh\` |
+
+## 7. Định nghĩa "DONE" (yêu cầu BẰNG CHỨNG)
+Một feature chỉ \`done\` khi TẤT CẢ đúng:
+- \`npm run check\` xanh (0 lỗi type).
+- \`npm run lint\` xanh.
+- \`npm run test\` xanh (test mới cho code mới).
+- \`npm run build\` xanh.
+- \`migration:run\` chạy sạch nếu feature đụng schema.
+- Trường \`evidence\` trong \`feature_list.json\` có log/output thực, không phải lời hứa.
+
+**Tách người làm khỏi người kiểm**: không tự tuyên bố done bằng cảm tính — phải dán output lệnh verify.
+
+## 8. Ràng buộc cứng (constrain, đừng vi quản lý)
+- KHÔNG đổi tech stack, tên db/user/pass/port, tên script ở \`package.json\` gốc.
+- KHÔNG commit \`.env\` (chỉ commit \`.env.example\`).
+- KHÔNG sửa schema trực tiếp trong DB — luôn qua TypeORM migration.
+- Mỗi PR phải qua được \`init.sh\`. Harness (các file này) là hạ tầng dùng chung, review trong PR như code.
+- Để lại **clean state**: phiên sau chỉ cần \`bash init.sh\`.
+
+## 9. Escalation
+- DB không healthy: kiểm tra \`docker compose ps\`, log \`docker compose logs db\`, đối chiếu \`.env\` với \`docker-compose.yml\`. Probe trong \`init.sh\` dùng đúng \`-u"$DB_USER" -p"$DB_PASS"\` (mặc định \`hr\`/\`hr_pass\`), khớp healthcheck — KHÔNG dùng root mặc định (sẽ Access denied).
+- **Xung đột cổng 3306**: nếu máy dev đã chạy MySQL cục bộ chiếm 3306, \`npm run db:up\` sẽ lỗi bind cổng. Khắc phục: đặt \`DB_PORT=3307\` (hoặc cổng trống khác) trong \`.env\`; \`docker-compose.yml\` map \`"\${DB_PORT:-3306}:3306"\` và TypeORM cũng đọc \`DB_PORT\` từ \`.env\` — toàn bộ pipeline đồng bộ theo một biến.
+- Migration lỗi: đọc \`apps/api/src/migrations\`, không xóa migration đã merge — viết migration mới.
+- Verify đỏ mà không rõ nguyên nhân: ghi blocker vào \`progress.md\` + \`session-handoff.md\`, KHÔNG đánh dấu done.
+
+## 10. Liên kết
+- Sản phẩm: \`docs/PRODUCT.md\`
+- Kiến trúc: \`docs/ARCHITECTURE.md\`
+- Trạng thái feature: \`.claude/feature_list.json\`
+- Nhật ký: \`progress.md\` — Bàn giao: \`session-handoff.md\``;
+
+F["docs/ARCHITECTURE.md"] = `# Kiến trúc — Quản lý nhân viên
+
+## Tổng quan monorepo (npm workspaces)
+\`\`\`
+quan-ly-nhan-su/
+├── package.json            # gốc, workspaces ["apps/*"], scripts điều phối
+├── docker-compose.yml      # MySQL 8 (service db)
+├── .nvmrc                  # 20
+├── .env.example            # biến DB + JWT
+├── init.sh                 # cài + verify toàn bộ
+├── .claude/feature_list.json
+├── apps/
+│   ├── api/                # NestJS 10 + TypeORM + MySQL (Jest)
+│   │   ├── src/
+│   │   │   ├── main.ts
+│   │   │   ├── data-source.ts       # TypeORM DataSource (đọc env)
+│   │   │   ├── phong-ban/           # module PhongBan (entity)
+│   │   │   ├── nhan-vien/           # module NhanVien (controller/service/dto/entity)
+│   │   │   ├── auth/                # JWT auth + guard
+│   │   │   └── migrations/          # << vị trí migrations TypeORM
+│   │   └── package.json
+│   └── web/                # React 18 + Vite + TS (Vitest)
+│       ├── src/
+│       │   ├── main.tsx
+│       │   ├── api/                 # client gọi REST
+│       │   └── pages/               # danh sách + form nhân viên
+│       └── package.json
+└── docs/
+\`\`\`
+
+## Các tầng (apps/api)
+- **Controller** (HTTP): nhận request REST, validate qua DTO (class-validator).
+- **Service**: nghiệp vụ, gọi repository TypeORM.
+- **Entity / Repository**: ánh xạ bảng MySQL.
+- **Auth**: JWT — login admin phát token; \`JwtAuthGuard\` bảo vệ route ghi.
+- **Migrations**: \`apps/api/src/migrations\`, chạy bằng TypeORM CLI qua \`npm run migration:run\` ở gốc.
+
+## Giao tiếp (HTTP, không IPC)
+Web (Vite, cổng dev mặc định 5173) gọi API NestJS qua REST/JSON. Đường dẫn ví dụ:
+\`\`\`
+POST   /auth/login          -> { token }
+GET    /nhan-vien           -> danh sách
+POST   /nhan-vien           -> tạo (cần JWT)
+GET    /nhan-vien/:id
+PATCH  /nhan-vien/:id        -> sửa (cần JWT)
+DELETE /nhan-vien/:id        -> xóa (cần JWT)
+\`\`\`
+
+## Mô hình dữ liệu — quan hệ NhanVien ↔ PhongBan
+\`\`\`
+PhongBan (phong_ban)          NhanVien (nhan_vien)
+┌────────────────┐            ┌──────────────────────────┐
+│ id (PK)        │ 1        * │ id (PK)                  │
+│ ten            │◄───────────│ ho_ten                   │
+│                │            │ email (unique)           │
+└────────────────┘            │ chuc_vu                  │
+                              │ phong_ban_id (FK -> PhongBan.id) │
+                              │ ngay_vao_lam (date)      │
+                              │ luong (decimal)          │
+                              └──────────────────────────┘
+\`\`\`
+Quan hệ: \`NhanVien\` **ManyToOne** \`PhongBan\` (nhiều nhân viên thuộc một phòng ban). Khóa ngoại \`phong_ban_id\` tạo trong migration của feat-004.
+
+## Cấu hình kết nối DB
+TypeORM \`DataSource\` đọc từ env (\`apps/api/src/data-source.ts\`): \`DB_HOST\`, \`DB_PORT\`, \`DB_USER\`, \`DB_PASS\`, \`DB_NAME\`. Khớp với \`docker-compose.yml\` và \`.env.example\` (db=\`hr\`, user=\`hr\`, pass=\`hr_pass\`, port=\`3306\`).`;
+
+F["docs/PRODUCT.md"] = `# Sản phẩm — Trang quản lý nhân viên
+
+## Mục tiêu
+Cho phép admin của công ty quản lý danh sách nhân viên theo phòng ban: xem, thêm, sửa, xóa. Truy cập ghi cần đăng nhập admin.
+
+## Người dùng
+- **Admin**: đăng nhập, toàn quyền CRUD nhân viên & phòng ban.
+- **Khách nội bộ (xem)**: có thể xem danh sách (route đọc không bắt buộc JWT trong phạm vi học tập).
+
+## Use case chính
+1. **Đăng nhập admin** — nhập tài khoản → nhận JWT → mở khóa thao tác ghi.
+2. **Xem danh sách nhân viên** — bảng hiển thị họ tên, email, chức vụ, phòng ban, ngày vào làm, lương.
+3. **Thêm nhân viên** — form nhập đủ trường, validate, lưu, hiển thị lại trong danh sách.
+4. **Sửa nhân viên** — mở form điền sẵn, cập nhật, lưu.
+5. **Xóa nhân viên** — xác nhận rồi xóa khỏi danh sách.
+6. **Gán phòng ban** — mỗi nhân viên thuộc đúng một phòng ban (chọn từ danh sách phòng ban).
+
+## Trường dữ liệu nhân viên (NhanVien)
+| Trường | Kiểu | Ràng buộc |
+|---|---|---|
+| \`ho_ten\` | string | bắt buộc, không rỗng |
+| \`email\` | string | bắt buộc, định dạng email, **unique** |
+| \`chuc_vu\` | string | bắt buộc (ví dụ: Nhân viên, Trưởng nhóm) |
+| \`phong_ban\` | quan hệ → PhongBan | bắt buộc, ManyToOne (lưu \`phong_ban_id\`) |
+| \`ngay_vao_lam\` | date | bắt buộc, không ở tương lai |
+| \`luong\` | decimal | bắt buộc, > 0 |
+
+## Trường dữ liệu phòng ban (PhongBan)
+| Trường | Kiểu | Ràng buộc |
+|---|---|---|
+| \`ten\` | string | bắt buộc, unique (ví dụ: Kế toán, Kỹ thuật) |
+
+## Quy tắc nghiệp vụ
+- Email nhân viên là duy nhất toàn hệ thống.
+- Không xóa phòng ban nếu còn nhân viên trực thuộc (kiểm tra ở service).
+- Lương lưu dạng decimal, hiển thị định dạng tiền tệ VND ở frontend.
+
+## Định nghĩa hoàn tất sản phẩm (cho feat-008 E2E)
+Đăng nhập admin → tạo nhân viên qua form → nhân viên xuất hiện trong danh sách với đúng phòng ban. Có bằng chứng (log/ảnh/test pass).`;
+
+/* ---------- demo / simulation data ---------- */
+const planPrompt = `Bối cảnh: Repo này đã có sẵn harness (AGENTS.md, CLAUDE.md,
+.claude/feature_list.json, init.sh, docker-compose.yml, .env.example,
+docs/PRODUCT.md, docs/ARCHITECTURE.md, docs/prototype/, progress.md, session-handoff.md).
+AGENTS.md là nguồn sự thật; docs/prototype/ là nguồn sự thật về GIAO DIỆN.
+
+Nhiệm vụ: Triển khai TẤT CẢ feature feat-001 → feat-009, LÀM TỚI KHI XONG HẾT
+(toàn bộ DAG 'done'), TÔN TRỌNG harness:
+
+1. Mỗi vòng: đọc AGENTS.md (3,4,6,7) → feature_list.json + progress.md →
+   chọn ĐÚNG 1 feature 'not-started' mà mọi dependency đã 'done'. Bắt đầu feat-001.
+2. Đặt feature đó 'in-progress' (chỉ 1 feature active mỗi lúc).
+3. Code đúng tech stack CỐ ĐỊNH (NestJS 10 + TypeORM + MySQL 8 / React 18 + Vite;
+   Node 20; MySQL docker-compose db hr / user hr / pass hr_pass / port 3306).
+4. UI (feat-007): BÁM SÁT docs/prototype/ — dùng lại design tokens (styles.css),
+   layout app-shell (sidebar + topbar), bảng nhân viên (avatar/badge/lương VND),
+   modal Thêm/Sửa, trang đăng nhập/đăng ký. KHÔNG xuất HTML thô không style.
+5. KHÔNG đổi stack/tên db-user-pass-port/tên script package.json. KHÔNG commit .env.
+   KHÔNG sửa schema trực tiếp — luôn qua TypeORM migration.
+6. Sau mỗi thay đổi: npm run check && lint && test && build (+ migration:run nếu đụng schema).
+7. DONE = check/lint/test/build xanh + migration sạch + dán OUTPUT THẬT vào 'evidence'.
+   KHÔNG tự tuyên bố done bằng cảm tính.
+8. Xong feature: chạy lại bash init.sh, dán output vào evidence; cập nhật
+   feature_list.json (done), progress.md, session-handoff.md. Để clean state.
+
+LẶP vòng trên cho tới khi TẤT CẢ feat-001..009 'done' (init.sh xanh, app chạy &
+UI khớp prototype). KHÔNG dừng giữa chừng khi còn feature chưa done. Chỉ dừng &
+báo cáo nếu verify đỏ không rõ nguyên nhân (ghi blocker, KHÔNG đánh dấu done).`;
+
+const steps = [
+ {n:1,a:"Định hướng phiên: đọc nguồn sự thật AGENTS.md (1,3,4,6,7) + CLAUDE.md + mở docs/prototype/ → nắm tech stack, vòng act→observe→feedback, lệnh verify, định nghĩa DONE, UI spec.",
+  c:"sed -n '1,60p' AGENTS.md && open docs/prototype/index.html",
+  r:"Nắm: monorepo npm workspaces; Node 20; db hr/hr/hr_pass:3306. Verify mục 6. DONE = dán output thật. UI phải khớp docs/prototype/. Ràng buộc: không đổi stack/script, không commit .env."},
+ {n:2,a:"Đọc trạng thái scope: feature_list.json + progress.md. Áp DAG → feat-001 (deps []) là feature hợp lệ duy nhất để bắt đầu. Plan: chạy HẾT feat-001 → feat-009.",
+  c:"cat .claude/feature_list.json && sed -n '1,20p' progress.md",
+  r:"feat-001 [] → feat-002 [001] → ... → feat-009 [008]. progress: active=feat-001. → Chọn feat-001, set 'in-progress' (chỉ 1 active mỗi lúc)."},
+ {n:3,a:"feat-001 Project setup → verify → DONE: tạo package.json gốc + apps/api (NestJS) + apps/web (React+Vite), cài deps, bật MySQL, chạy bash init.sh. Dán log, set 'done'.",
+  c:"npm install && npm run db:up && bash init.sh",
+  r:"added 1241 packages. MySQL Up (healthy). init.sh 9/9 → HARNESS XANH. feat-001 'done' (evidence = log init.sh). progress/handoff: active→feat-002."},
+ {n:4,a:"feat-002 Kết nối DB + TypeORM: data-source.ts đọc env, TypeOrmModule.forRootAsync. Verify kết nối THẬT qua migration:run.",
+  c:"npm run check && npm run migration:run",
+  r:"check 0 lỗi. migration:run → SELECT VERSION() 8.0.x → 'No migrations are pending' → DataSource connect MySQL hr@127.0.0.1:3306 OK. feat-002 'done'."},
+ {n:5,a:"feat-003 Entity PhongBan + migration: phong-ban.entity.ts (id PK, ten unique). Sinh migration bằng TypeORM CLI rồi migration:run.",
+  c:"npm run migration:generate ... CreatePhongBan && npm run migration:run",
+  r:"CREATE TABLE `phong_ban` (ten UNIQUE) ... 'executed successfully.' check/lint/test/build xanh. feat-003 'done'."},
+ {n:6,a:"feat-004 Entity NhanVien + ManyToOne + migration: email unique, ngay_vao_lam date, luong decimal; ManyToOne PhongBan + khóa ngoại.",
+  c:"npm run migration:generate ... CreateNhanVien && npm run migration:run",
+  r:"CREATE TABLE `nhan_vien` (... email UNIQUE, phong_ban_id) + ALTER ADD CONSTRAINT FK_nv_phong_ban ... 'executed successfully.' check/build xanh. feat-004 'done'."},
+ {n:7,a:"feat-005 API CRUD: controller (GET/GET:id/POST/PATCH/DELETE) + service + DTO validation (email, ngay_vao_lam không tương lai, luong>0). Jest test.",
+  c:"npm run check && npm run lint && npm run test",
+  r:"check 0 lỗi. lint xanh. jest 'Tests: 4 passed, 2 suites'. CRUD sẵn sàng; route ghi chưa guard (để feat-006). feat-005 'done'."},
+ {n:8,a:"feat-006 Auth JWT: /auth/login phát token; JwtAuthGuard bảo vệ route ghi (POST/PATCH/DELETE). Jest cho auth + guard.",
+  c:"npm run test && curl -s -XPOST localhost:3000/auth/login -d '{...}'",
+  r:"jest auth pass. login → { token }. POST /nhan-vien không token → 401; có token → 201. feat-006 'done'."},
+ {n:9,a:"feat-007 Frontend React BÁM docs/prototype/: app-shell (sidebar+topbar), bảng (avatar/badge/lương VND), modal Thêm/Sửa, trang đăng nhập. Dùng lại design tokens.",
+  c:"npm run build -w apps/web && npm run dev",
+  r:"vite build ✓. UI khớp prototype (KHÔNG HTML thô): list + modal + auth render đúng tokens. vitest component pass. feat-007 'done'."},
+ {n:10,a:"feat-008 E2E + feat-009 handoff: đăng nhập admin → tạo NV qua form → NV hiện trong danh sách đúng phòng ban. Chạy lại bash init.sh; cập nhật progress/handoff; clean state.",
+  c:"npm run test:e2e && bash init.sh && git status --short",
+  r:"E2E pass (login→tạo→hiện danh sách). HARNESS XANH. git status: không có .env. feat-001..009 đều 'done'. ✅ Plan hoàn tất từ đầu → cuối."}
+];
+
+const evi = [
+ {check:"init.sh chạy toàn pipeline xanh từ checkout sạch (feat-001) — đúng 9 bước",
+  cmd:"bash init.sh",
+  out:`==> 1/9 Kiểm tra Node 20
+Node v20.19.0 OK
+==> 2/9 Chuẩn bị .env
+Đã tạo .env từ .env.example
+==> 3/9 npm install (workspaces)
+added 1241 packages in 38s
+==> 4/9 npm run db:up (MySQL 8 qua docker-compose)
+[+] Running 1/1
+ Container qlns-mysql  Started
+==> 5/9 Chờ MySQL healthy
+....
+MySQL healthy (db=hr, host=127.0.0.1, port=3306, user=hr)
+==> 6/9 npm run migration:run (TypeORM)
+No migrations are pending
+==> 7/9 npm run check (typecheck api + web)
+> tsc --noEmit  (apps/api) ✓
+> tsc --noEmit  (apps/web) ✓
+==> 8/9 npm run lint && npm run test (jest + vitest)
+eslint: ✓ 0 problems
+jest: No tests found, exiting with code 0 (passWithNoTests)
+vitest: no test files
+==> 9/9 npm run build (api + web)
+nest build ✓   vite build ✓
+================ HARNESS XANH ================`},
+ {check:"TypeORM DataSource kết nối MySQL thật (feat-002) — connect rồi báo no pending",
+  cmd:"npm run migration:run",
+  out:`> @qlns/api migration:run
+> typeorm-ts-node-commonjs migration:run -d src/data-source.ts
+
+query: SELECT VERSION() AS \`version\`
+query: SELECT * FROM \`INFORMATION_SCHEMA\`.\`COLUMNS\` WHERE \`TABLE_SCHEMA\` = 'hr' AND \`TABLE_NAME\` = 'migrations'
+No migrations are pending`},
+ {check:"Migration tạo bảng nhan_vien + FK tới phong_ban (feat-004) chạy sạch",
+  cmd:"npm run migration:run",
+  out:`query: CREATE TABLE \`nhan_vien\` (\`id\` int NOT NULL AUTO_INCREMENT, \`ho_ten\` varchar(255) NOT NULL, \`email\` varchar(255) NOT NULL, \`chuc_vu\` varchar(255) NOT NULL, \`ngay_vao_lam\` date NOT NULL, \`luong\` decimal(12,2) NOT NULL, \`phong_ban_id\` int NULL, UNIQUE INDEX \`IDX_nv_email\` (\`email\`), PRIMARY KEY (\`id\`)) ENGINE=InnoDB
+query: ALTER TABLE \`nhan_vien\` ADD CONSTRAINT \`FK_nv_phong_ban\` FOREIGN KEY (\`phong_ban_id\`) REFERENCES \`phong_ban\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION
+Migration CreateNhanVien1718900000000 has been executed successfully.`},
+ {check:"Jest test xanh cho CRUD nhân viên (feat-005); vitest passWithNoTests bên web",
+  cmd:"npm run test",
+  out:`> @qlns/api test
+> jest
+
+ PASS  src/nhan-vien/nhan-vien.service.spec.ts
+ PASS  src/nhan-vien/nhan-vien.controller.spec.ts
+
+Test Suites: 2 passed, 2 total
+Tests:       4 passed, 4 total
+Time:        3.1 s
+
+> @qlns/web test
+> vitest run
+
+No test files found, exiting with code 0 (passWithNoTests)`},
+ {check:"Auth JWT (feat-006): login phát token, guard chặn route ghi khi thiếu token",
+  cmd:"curl -s -XPOST localhost:3000/auth/login -d '{...}' ; curl -i -XPOST localhost:3000/nhan-vien",
+  out:`POST /auth/login        -> 200 { "token": "eyJhbGciOiJIUzI1Ni..." }
+POST /nhan-vien (no JWT) -> HTTP/1.1 401 Unauthorized
+POST /nhan-vien (Bearer) -> HTTP/1.1 201 Created`},
+ {check:"Frontend khớp prototype (feat-007): vite build xanh + vitest component pass",
+  cmd:"npm run build -w apps/web && npm run test -w apps/web",
+  out:`> @qlns/web build
+vite v5  building for production...
+✓ 312 modules transformed.  dist/ built in 1.84s
+
+> @qlns/web test
+ PASS  src/pages/EmployeeList.test.tsx   (bảng: avatar + badge phòng ban + lương VND)
+ PASS  src/pages/EmployeeModal.test.tsx  (form Thêm/Sửa: validate + submit)
+Test Files  2 passed (2)   Tests  6 passed (6)
+→ UI render theo docs/prototype/ (app-shell + modal), KHÔNG phải HTML thô.`},
+ {check:"E2E (feat-008): đăng nhập admin → tạo NV qua form → NV hiện trong danh sách đúng phòng ban",
+  cmd:"npm run test:e2e",
+  out:`Running 1 test using 1 worker
+  ✓  e2e/employee-flow.spec.ts:3 (đăng nhập → tạo nhân viên → hiện trong danh sách) (2.4s)
+     · login admin → nhận JWT
+     · điền form (Trần Thu Hà / Kế toán / 15.000.000 ₫) → Lưu
+     · assert: dòng "Trần Thu Hà" + badge "Kế toán" xuất hiện trong bảng
+  1 passed (3.0s)`},
+ {check:"Clean state — .env không bị commit (đã .gitignore)",
+  cmd:"git status --short && grep -n '.env' .gitignore",
+  out:`M  .claude/feature_list.json
+M  progress.md
+M  session-handoff.md
+A  package.json
+A  apps/api/...
+A  apps/web/...
+(không có dòng nào cho .env)
+5:.env
+6:.env.local`}
+];
+
+const finalStates = [
+ ["feat-001","Project setup","done","log đầy đủ bash init.sh (9/9, HARNESS XANH): Node v20, MySQL healthy, migration no-pending, check/lint/build xanh, jest/vitest passWithNoTests."],
+ ["feat-002","Kết nối DB + TypeORM","done","output npm run migration:run: DataSource connect thật (SELECT VERSION(), đọc INFORMATION_SCHEMA db 'hr') rồi no pending; + check 0 lỗi."],
+ ["feat-003","Entity PhongBan + migration","done","migration:generate CreatePhongBan OK + migration:run log CREATE TABLE phong_ban (ten UNIQUE) 'executed successfully'."],
+ ["feat-004","Entity NhanVien + ManyToOne + migration","done","migration:run CREATE TABLE nhan_vien (email unique, luong decimal(12,2), phong_ban_id) + ALTER ADD CONSTRAINT FK_nv_phong_ban 'executed successfully'."],
+ ["feat-005","API CRUD Nhân viên","done","check 0 lỗi + lint xanh + jest 'Tests: 4 passed, 2 suites'."],
+ ["feat-006","Auth JWT","done","login → { token }; POST /nhan-vien không token → 401, có Bearer → 201; jest auth + guard pass."],
+ ["feat-007","Frontend React (bám prototype)","done","vite build ✓ + vitest 6 passed; UI render theo docs/prototype/ (app-shell + bảng VND + modal), không HTML thô."],
+ ["feat-008","Kiểm thử E2E","done","Playwright 1 passed: đăng nhập admin → tạo NV qua form → 'Trần Thu Hà' + badge 'Kế toán' hiện trong danh sách."],
+ ["feat-009","Dọn dẹp & handoff","done","bash init.sh cuối 'HARNESS XANH'; progress.md/session-handoff.md cập nhật; clean state, không commit .env."]
+];
+
+/* ---------- subsystem badge helper ---------- */
+function subBadge(s){
+  const m = {"Hướng dẫn":"guide","Công cụ":"env","Môi trường":"env","Trạng thái":"state","Phản hồi":"fb","Vòng đời":"life"};
+  return `<span class="pill ${m[s]||'guide'}">Hệ thống: ${s}</span>`;
+}
+function practiceFile(opts){
+  return `<div class="tag-row">${subBadge(opts.sub)}<span class="pill">${opts.path}</span></div>
+    <div class="why"><h3>Vì sao cần</h3><p style="margin:.2em 0">${opts.why}</p></div>
+    ${codeBlock(opts.path, opts.content)}
+    <p class="muted" style="font-size:14.5px;margin-top:8px">▶ Lệnh đặt file:</p>
+    <span class="cmd">${esc(opts.cmd)}</span>`;
+}
+
+/* ---------- build slides ---------- */
+const slides = [];
+
+// 1 title
+slides.push(`<div class="slide title-slide">
+  <span class="eyebrow">Workshop · AI Coding</span>
+  <h1>BUỔI 7: Harness Design,<br>Team Adoption &amp; Cross-Model</h1>
+  <p class="lead">Dựng harness tối thiểu cho web <strong>"Quản lý nhân viên"</strong> (NestJS + MySQL + TypeORM / React) — từ 5 hệ thống phụ tới adoption đội nhóm &amp; chạy đa-model.</p>
+  <div class="author">
+    <span class="badge"><strong>Đỗ Ngọc Quang</strong> — AI Engineering</span>
+    <span class="badge">🗺️ Buổi đi qua <strong>12 phần</strong></span>
+    <span class="badge">📦 Đầu ra: 5 file lõi copy-paste ngay</span>
+  </div>
+  <p class="muted" style="margin-top:26px">Chủ đề xuyên suốt: xây 1 ví dụ thật, không nói chay. Bạn rời buổi học với harness áp ngay vào repo của mình.</p>
+</div>`);
+
+// 2 poll
+slides.push(`<div class="slide">
+  <span class="eyebrow">Poll · Khởi động</span>
+  <h2>Harness Engineering — bạn hiểu là gì?</h2>
+  <p class="lead">Trả lời nhanh tại chỗ. Chưa cần đúng/sai — để dành phần chốt định nghĩa.</p>
+  <div class="grid g2" style="margin-top:14px">
+    <div class="card"><span class="pill">A</span><h3 style="margin-top:8px">Prompt khéo</h3><p class="muted">Viết câu lệnh thật giỏi cho model.</p></div>
+    <div class="card"><span class="pill env">B</span><h3 style="margin-top:8px">Bộ công cụ</h3><p class="muted">Các tool/script agent gọi được.</p></div>
+    <div class="card"><span class="pill fb">C</span><h3 style="margin-top:8px">"Mọi thứ ngoài model"</h3><p class="muted">Toàn bộ scaffold quanh trọng số.</p></div>
+    <div class="card"><span class="pill state">D</span><h3 style="margin-top:8px">Chưa rõ</h3><p class="muted">Mới nghe lần đầu.</p></div>
+  </div>
+  <div class="note" style="margin-top:18px"><h3>Câu hỏi treo</h3><p style="margin:.2em 0">Vì sao <strong>cùng một model</strong> mà người này dùng hiệu quả gấp nhiều lần người kia?</p></div>
+</div>`);
+
+// 2b video — xem sau khi cả lớp trả lời poll
+slides.push(`<div class="slide">
+  <span class="eyebrow">Khởi động · Video</span>
+  <h2>Xem video sau khi cả lớp trả lời</h2>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:6px">
+    <div style="height:62vh;max-height:560px;aspect-ratio:9/16;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#000">
+      <iframe width="100%" height="100%" style="display:block;border:0"
+        src="https://www.youtube.com/embed/XSErAHIO3dU"
+        title="Harness Engineering — video khởi động"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen></iframe>
+    </div>
+    <p class="muted" style="margin:0">Giữ trong đầu câu hỏi treo ở slide trước khi xem.</p>
+  </div>
+</div>`);
+
+// 3 evolution
+slides.push(`<div class="slide">
+  <span class="eyebrow">Mạch tiến hóa</span>
+  <h2>Prompt → Context → Harness → Loop Engineering</h2>
+  <div class="grid g2" style="grid-template-columns:1.05fr 1fr;align-items:center">
+    <div>
+      <div class="rings">
+        <div class="ring r1"><span>Loop engineering</span></div>
+        <div class="ring r2"><span>Harness engineering</span></div>
+        <div class="ring r3"><span>Context engineering</span></div>
+        <div class="ring r4"><span>Prompt</span></div>
+      </div>
+      <p class="muted" style="text-align:center;font-size:14px">Các lớp <strong>BAO NHAU</strong>, không thay thế nhau.</p>
+    </div>
+    <div>
+      <div class="why"><h3>✔ Verdict: ĐÚNG</h3><p style="margin:.2em 0;font-size:15.5px">Khớp định nghĩa OpenAI về công việc lõi của kỹ sư AI: (1) thiết kế môi trường, (2) diễn đạt ý định, (3) xây vòng phản hồi. Harness = mọi thứ ngoài weights quyết định bao nhiêu năng lực model được hiện thực hóa.</p></div>
+      <div class="note"><h3>⚠ Caveat</h3><p style="margin:.2em 0;font-size:15.5px">'Loop engineering' là tầng <strong>mới &amp; ít chuẩn hóa nhất</strong>: bản chất là subsystem <strong>Phản hồi</strong> được nâng cấp + điều phối nhiều vòng lặp/multi-agent. Đừng vẽ 4 hộp rời — loop chứa harness, harness chứa context, context chứa prompt.</p></div>
+    </div>
+  </div>
+</div>`);
+
+// 4 definition
+slides.push(`<div class="slide">
+  <span class="eyebrow">Chốt định nghĩa</span>
+  <h2>Harness Engineering là gì</h2>
+  <div class="card" style="border-color:#4a3e92;background:linear-gradient(180deg,#1d2350,#231a47)">
+    <p style="font-size:23px;line-height:1.45;margin:.2em 0">Harness = <strong>MỌI THỨ trong hạ tầng kỹ thuật nằm NGOÀI trọng số mô hình</strong>, quyết định bao nhiêu phần năng lực model thực sự được hiện thực hóa.</p>
+  </div>
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card tight"><h3>🧭 Nguyên tắc nền</h3><p>"<strong>Repo chính là spec / system of record</strong>" — thứ gì agent không nhìn thấy thì coi như không tồn tại.</p></div>
+    <div class="card tight"><h3>💡 Hệ quả</h3><p>Muốn agent làm tốt hơn, <strong>đừng chỉ đổi model</strong> — hãy đầu tư vào harness.</p></div>
+  </div>
+  <div class="note" style="margin-top:14px"><h3>↩ Đối chiếu poll</h3><p style="margin:.2em 0">Harness <strong>KHÔNG phải</strong> "prompt khéo" (đáp án A) — mà là toàn bộ scaffold đa thành phần (đáp án C).</p></div>
+</div>`);
+
+// 5 five subsystems diagram
+slides.push(`<div class="slide">
+  <span class="eyebrow">Khung trung tâm</span>
+  <h2>Mô hình 5 hệ thống phụ → ánh xạ artifact</h2>
+  <div class="card tight">
+  <table>
+    <tr><th>Hệ thống phụ</th><th>Vai trò</th><th>Artifact trong repo</th></tr>
+    <tr><td><span class="pill guide">1. Hướng dẫn</span></td><td>Bản đồ + luật chơi</td><td class="art">AGENTS.md / CLAUDE.md</td></tr>
+    <tr><td><span class="pill env">2. Công cụ</span></td><td>shell/files/tests + least-privilege</td><td class="art">quyền chạy lệnh, scripts</td></tr>
+    <tr><td><span class="pill env">3. Môi trường</span></td><td>tái lập được</td><td class="art">package.json·lockfile, .nvmrc, docker-compose, migrations</td></tr>
+    <tr><td><span class="pill state">4. Trạng thái</span></td><td>scope + nhật ký + bàn giao</td><td class="art">feature_list.json, progress.md, session-handoff.md</td></tr>
+    <tr><td><span class="pill fb">5. Phản hồi</span></td><td>vòng verify tự động <strong>(ROI cao nhất)</strong></td><td class="art">init.sh + lệnh verify</td></tr>
+  </table>
+  </div>
+  <p class="muted" style="margin-top:12px">⭐ <strong>5 file lõi</strong> harness tối thiểu: AGENTS.md/CLAUDE.md · feature_list.json · progress.md · init.sh · session-handoff.md. Phản hồi đầu tư trước tiên — yêu cầu BẰNG CHỨNG trước khi done, tách "người làm" khỏi "người kiểm".</p>
+</div>`);
+
+// 6 ablation bars
+slides.push(`<div class="slide">
+  <span class="eyebrow">Câu chuyện ablation · loại trừ biến có kiểm soát</span>
+  <h2>Cùng model, đổi harness: 20% → 100%</h2>
+  <p class="lead">Cùng GPT-4o, app TS + React ~20k dòng. Model không đổi — <strong>harness mới là thứ thay đổi</strong>.</p>
+  <div class="bars">
+    <div class="bar-row"><span class="bar-label">Chỉ README</span><div class="bar-track"><div class="bar-fill" style="width:20%"></div></div><span class="bar-pct">20%</span></div>
+    <div class="bar-row"><span class="bar-label">+ AGENTS.md (Hướng dẫn)</span><div class="bar-track"><div class="bar-fill" style="width:60%"></div></div><span class="bar-pct">60%</span></div>
+    <div class="bar-row"><span class="bar-label">+ lệnh verify (Phản hồi)</span><div class="bar-track"><div class="bar-fill" style="width:80%"></div></div><span class="bar-pct">80%</span></div>
+    <div class="bar-row"><span class="bar-label">+ file tiến độ (Trạng thái)</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="bar-pct">100%</span></div>
+  </div>
+  <p class="muted" style="margin-top:18px">Gỡ lần lượt từng subsystem để đo <strong>đóng góp biên</strong> — đây là bằng chứng định lượng cho giá trị harness trước khi vào thực hành.</p>
+</div>`);
+
+// 7 practice intro
+slides.push(`<div class="slide">
+  <span class="eyebrow">Chủ đề thực hành</span>
+  <h2>Web Quản lý nhân viên — tech stack cố định</h2>
+  <div class="grid g2">
+    <div class="card"><h3>🎯 Bài toán</h3><p>Trang Quản lý nhân viên cho công ty — domain <strong>PhongBan</strong> (Department) + <strong>NhanVien</strong> (Employee): CRUD + auth + frontend + E2E.</p></div>
+    <div class="card"><h3>🧱 Tech stack (cố định)</h3>
+      <ul style="margin:.2em 0">
+        <li>Monorepo npm workspaces <code class="inl">quan-ly-nhan-su/</code></li>
+        <li><code class="inl">apps/api</code>: NestJS 10 + TypeORM + MySQL 8 · Jest</li>
+        <li><code class="inl">apps/web</code>: React 18 + Vite + TS · Vitest</li>
+        <li>MySQL docker-compose (db <span class="kpill">hr/hr/hr_pass:3306</span>), Node 20</li>
+      </ul></div>
+  </div>
+  <div class="card tight" style="margin-top:14px"><h3>🧩 9 feature có DAG</h3>
+    <div class="dag">
+      <span class="node">feat-001 setup</span><span class="arrow">→</span>
+      <span class="node">002 DB+TypeORM</span><span class="arrow">→</span>
+      <span class="node">003 PhongBan</span><span class="arrow">→</span>
+      <span class="node">004 NhanVien</span><span class="arrow">→</span>
+      <span class="node">005 CRUD API</span><span class="arrow">→</span>
+      <span class="node">006 Auth</span><span class="arrow">+</span>
+      <span class="node">007 React</span><span class="arrow">→</span>
+      <span class="node">008 E2E</span><span class="arrow">→</span>
+      <span class="node">009 handoff</span>
+    </div></div>
+</div>`);
+
+// 7b setup — từng bước dựng dự án trước khi vào từng file
+slides.push(`<div class="slide">
+  <span class="eyebrow">Chủ đề thực hành · Setup</span>
+  <h2>Dựng dự án từng bước (trước khi vào từng file)</h2>
+  <div class="grid g2">
+    <div class="card"><h3>🧰 Cần chuẩn bị (1 lần)</h3>
+      <ul style="margin:.2em 0">
+        <li><strong>Node 20</strong> qua <code class="inl">nvm</code> (xem <code class="inl">.nvmrc</code>)</li>
+        <li><strong>Docker Desktop</strong> — chạy MySQL 8 qua docker-compose</li>
+        <li><strong>git</strong> + một editor (VS Code…)</li>
+        <li>Một agent CLI: <strong>Claude Code</strong> hoặc <strong>Codex</strong></li>
+      </ul></div>
+    <div class="card"><h3>📦 Khởi đầu: clone repo harness-nhan-su</h3>
+      <p>Clone repo template về máy làm điểm khởi đầu — đã đủ 5 file lõi + môi trường + docs + prototype, chỉ còn dựng <code class="inl">apps/*</code> theo feature.</p>
+      <p class="muted" style="font-size:13px;margin:.4em 0 0">🔗 <code class="inl">github.com/dongocquang292/harness-nhan-su</code></p></div>
+  </div>
+  <div class="card tight" style="margin-top:14px"><h3>▶ 4 bước khởi động</h3>
+    <span class="cmd" style="margin:6px 0">git clone https://github.com/dongocquang292/harness-nhan-su.git &amp;&amp; cd harness-nhan-su</span>
+    <p style="font-size:14.5px;margin:.2em 0;color:#bfe6ff">① Clone repo về máy (xem cấu trúc ở slide "Cây thư mục").</p>
+    <span class="cmd" style="margin:6px 0">nvm use    # Node 20 theo .nvmrc</span>
+    <p style="font-size:14.5px;margin:.2em 0;color:#bfe6ff">② Khóa Node 20 cho môi trường tái lập được.</p>
+    <span class="cmd" style="margin:6px 0">cp .env.example .env</span>
+    <p style="font-size:14.5px;margin:.2em 0;color:#bfe6ff">③ Tạo .env từ mẫu (KHÔNG commit .env). Đối chiếu các file lõi qua các slide FILE 1→5.</p>
+    <span class="cmd" style="margin:6px 0">bash init.sh</span>
+    <p style="font-size:14.5px;margin:.2em 0;color:#bfe6ff">④ Chạy init.sh từ checkout sạch → xanh là môi trường sẵn sàng, mới bắt đầu feat-001.</p>
+  </div>
+  <p class="muted" style="margin-top:10px">Đi qua từng file ở các slide FILE 1→5 để hiểu vai trò mỗi subsystem; clone <code class="inl">harness-nhan-su</code> cho nhanh, rồi dùng plan chạy toàn bộ feat-001 → feat-009.</p>
+</div>`);
+
+// 8 AGENTS.md
+slides.push(`<div class="slide">
+  <span class="eyebrow">FILE 1 / Practice</span>
+  <h2>AGENTS.md — Hướng dẫn (nguồn sự thật)</h2>
+  ${practiceFile({sub:"Hướng dẫn",path:"AGENTS.md",
+    why:"Bản đồ dự án + startup path + working rules + definition of done. Nguyên tắc: 'đưa bản đồ, đừng đưa cẩm nang' (~100 dòng); 'ràng buộc, đừng vi quản lý'. File dài = agent bỏ qua, nên link tới docs/ thay vì nhồi hết.",
+    content:F["AGENTS.md"],
+    cmd:'$EDITOR quan-ly-nhan-su/AGENTS.md   # dán nội dung'})}
+</div>`);
+
+// 9 CLAUDE.md
+slides.push(`<div class="slide">
+  <span class="eyebrow">FILE 2 / Practice</span>
+  <h2>CLAUDE.md — Hướng dẫn (stub cross-model)</h2>
+  ${practiceFile({sub:"Hướng dẫn",path:"CLAUDE.md",
+    why:"Claude Code đọc CLAUDE.md; nhưng nguồn sự thật phải nằm 1 chỗ. File này chỉ trỏ về AGENTS.md + vài bất biến riêng cho Claude, tránh để 2 file mâu thuẫn. Mẹo: thay bằng symlink CLAUDE.md -> AGENTS.md.",
+    content:F["CLAUDE.md"],
+    cmd:'$EDITOR quan-ly-nhan-su/CLAUDE.md   # hoặc: ln -s AGENTS.md CLAUDE.md'})}
+</div>`);
+
+// 10 package.json
+slides.push(`<div class="slide">
+  <span class="eyebrow">FILE 3 / Practice</span>
+  <h2>package.json — Môi trường (gốc monorepo)</h2>
+  ${practiceFile({sub:"Môi trường",path:"package.json",
+    why:"Định nghĩa workspaces apps/* + đầy đủ scripts của stack. dev dùng concurrently -k để Ctrl-C dừng cả api+web (không tiến trình rác). init.sh và AGENTS.md đều khớp đúng tên script này — một nguồn duy nhất.",
+    content:F["package.json"],
+    cmd:'$EDITOR quan-ly-nhan-su/package.json'})}
+</div>`);
+
+// 11 docker-compose
+slides.push(`<div class="slide">
+  <span class="eyebrow">FILE 4 / Practice</span>
+  <h2>docker-compose.yml — Môi trường (MySQL 8)</h2>
+  ${practiceFile({sub:"Môi trường",path:"docker-compose.yml",
+    why:"Môi trường tái lập: db/hr/hr/hr_pass + healthcheck. Cổng host override qua ${DB_PORT:-3306} để tránh xung đột MySQL cục bộ. Khớp .env.example và TypeORM — một biến DB_PORT đồng bộ cả docker lẫn app.",
+    content:F["docker-compose.yml"],
+    cmd:'$EDITOR quan-ly-nhan-su/docker-compose.yml'})}
+</div>`);
+
+// 12 .nvmrc
+slides.push(`<div class="slide">
+  <span class="eyebrow">FILE 5 / Practice</span>
+  <h2>.nvmrc — Môi trường (ghim Node)</h2>
+  ${practiceFile({sub:"Môi trường",path:".nvmrc",
+    why:"Ghim Node 20 để 'nvm use' và init.sh kiểm tra đúng phiên bản — khớp engines trong package.json. Tránh bug 'chạy máy tôi thì xanh': mọi người (và agent) dùng cùng runtime.",
+    content:F[".nvmrc"],
+    cmd:'printf "20\\n" > quan-ly-nhan-su/.nvmrc'})}
+</div>`);
+
+// 13 .env.example
+slides.push(`<div class="slide">
+  <span class="eyebrow">FILE 6 / Practice</span>
+  <h2>.env.example — Môi trường (mẫu biến)</h2>
+  ${practiceFile({sub:"Môi trường",path:".env.example",
+    why:"Mẫu biến DB cho TypeORM + JWT_SECRET, khớp docker-compose.yml. Chỉ commit .env.example (KHÔNG commit .env). DB_PORT dùng chung cho TypeORM lẫn override cổng host docker.",
+    content:F[".env.example"],
+    cmd:'$EDITOR quan-ly-nhan-su/.env.example   # rồi: cp .env.example .env'})}
+  <div class="tag-row" style="margin-top:12px">${subBadge("Môi trường")}<span class="pill">.gitignore</span></div>
+  ${codeBlock(".gitignore",F[".gitignore"])}
+</div>`);
+
+// 14 feature_list.json
+slides.push(`<div class="slide">
+  <span class="eyebrow">FILE 7 / Practice</span>
+  <h2>.claude/feature_list.json — Trạng thái (scope)</h2>
+  ${practiceFile({sub:"Trạng thái",path:".claude/feature_list.json",
+    why:"NGUỒN SỰ THẬT về scope: agent đọc để chọn việc, không tự bịa. Schema mỗi feature: id·name·description·dependencies (DAG)·status·evidence. Field 'evidence' chỉ điền khi có bằng chứng verify thật — chính chỗ này ngăn agent tự khai done.",
+    content:F["feature_list.json"],
+    cmd:'mkdir -p quan-ly-nhan-su/.claude && $EDITOR quan-ly-nhan-su/.claude/feature_list.json'})}
+</div>`);
+
+// 15 progress.md
+slides.push(`<div class="slide">
+  <span class="eyebrow">FILE 8 / Practice</span>
+  <h2>progress.md — Trạng thái (nhật ký phiên)</h2>
+  ${practiceFile({sub:"Trạng thái",path:"progress.md",
+    why:"feature_list.json là scope TĨNH (cái cần làm); progress.md là nhật ký ĐỘNG (đã làm tới đâu): Done/In-progress/Next/Blockers/Evidence. Mỗi mục done kèm bằng chứng verify. Giúp phiên sau nối tiếp mà không hỏi lại từ đầu.",
+    content:F["progress.md"],
+    cmd:'$EDITOR quan-ly-nhan-su/progress.md'})}
+</div>`);
+
+// 16 init.sh
+slides.push(`<div class="slide">
+  <span class="eyebrow">FILE 9 / Practice · ROI CAO NHẤT</span>
+  <h2>init.sh — Phản hồi + Môi trường</h2>
+  ${practiceFile({sub:"Phản hồi",path:"init.sh",
+    why:"Vòng phản hồi TỰ ĐỘNG: cài + chạy đúng chuỗi verify (Node→install→db:up→chờ MySQL healthy→migration→check→lint→test→build), khớp 100% scripts package.json. Đuôi script in hướng dẫn chọn-1-feature → biến verify thành vòng lặp khép kín. Agent tự biết pass/fail, không cần con người làm trọng tài từng bước.",
+    content:F["init.sh"],
+    cmd:'$EDITOR quan-ly-nhan-su/init.sh && chmod +x quan-ly-nhan-su/init.sh'})}
+</div>`);
+
+// 17 session-handoff
+slides.push(`<div class="slide">
+  <span class="eyebrow">FILE 10 / Practice</span>
+  <h2>session-handoff.md — Vòng đời (Lifecycle)</h2>
+  ${practiceFile({sub:"Vòng đời",path:"session-handoff.md",
+    why:"Cầu nối giữa các phiên: phiên/agent kế tiếp chạy được ngay từ init.sh mà không mất context. Nguyên tắc 'clean state' — mỗi phiên kết thúc để repo ở trạng thái init.sh chạy xanh. Khác progress.md: progress là nhật ký, handoff là bàn giao có chủ đích.",
+    content:F["session-handoff.md"],
+    cmd:'$EDITOR quan-ly-nhan-su/session-handoff.md'})}
+</div>`);
+
+// 18 docs
+slides.push(`<div class="slide">
+  <span class="eyebrow">FILE bổ sung / Practice</span>
+  <h2>docs/ &amp; môi trường tự mô tả (Công cụ + Môi trường)</h2>
+  <div class="why"><h3>Vì sao cần</h3><p style="margin:.2em 0">docs/ chứa chi tiết mà AGENTS.md chỉ <strong>link tới</strong>: kiến trúc, quy ước DTO/validation, hướng dẫn migration. <strong>Công cụ + least-privilege</strong>: agent phải CHẠY ĐƯỢC shell/files/tests — đừng tắt shell vì "bảo mật", chỉ giới hạn quyền theo nhu cầu. Tổng kết: 5 file lõi + môi trường + docs = agent thấy đủ để tự vận hành.</p></div>
+  <div class="grid g2">
+    <div>${codeBlock("docs/ARCHITECTURE.md",F["docs/ARCHITECTURE.md"])}</div>
+    <div>${codeBlock("docs/PRODUCT.md",F["docs/PRODUCT.md"])}</div>
+  </div>
+  <p class="muted" style="font-size:14px;margin-top:6px">▶ <span class="cmd">mkdir -p quan-ly-nhan-su/docs && $EDITOR quan-ly-nhan-su/docs/ARCHITECTURE.md quan-ly-nhan-su/docs/PRODUCT.md</span></p>
+</div>`);
+
+// 19 final tree
+slides.push(`<div class="slide">
+  <span class="eyebrow">Chốt harness hoàn chỉnh</span>
+  <h2>Cây thư mục harness-nhan-su/</h2>
+  <div class="tree">harness-nhan-su/
+├── AGENTS.md                 # Hướng dẫn — nguồn sự thật
+├── CLAUDE.md                 # Hướng dẫn — stub trỏ AGENTS.md
+├── package.json              # Môi trường — workspaces + scripts
+├── docker-compose.yml        # Môi trường — MySQL 8 (service db)
+├── .nvmrc                    # Môi trường — Node 20
+├── .env.example              # Môi trường — mẫu biến (KHÔNG commit .env)
+├── .gitignore                # Môi trường — bỏ qua node_modules/.env
+├── init.sh                   # Phản hồi — cài + verify toàn bộ ⭐ ROI cao nhất
+├── progress.md               # Trạng thái — nhật ký phiên
+├── session-handoff.md        # Vòng đời — bàn giao phiên
+├── .claude/
+│   └── feature_list.json     # Trạng thái — scope + DAG + evidence
+├── docs/
+│   ├── ARCHITECTURE.md       # Hướng dẫn (chi tiết)
+│   ├── PRODUCT.md            # Hướng dẫn (chi tiết)
+│   └── prototype/            # 🎨 Hướng dẫn — UI spec (HTML/CSS) cho apps/web
+└── apps/
+    ├── api/                  # NestJS 10 + TypeORM + MySQL (Jest)
+    └── web/                  # React 18 + Vite + TS (Vitest)</div>
+  <p class="muted" style="margin-top:10px">⭐ 5 file lõi (AGENTS/CLAUDE · feature_list · progress · init.sh · session-handoff) + môi trường + docs (gồm <strong>prototype giao diện</strong>) = harness chạy được, output đẹp.</p>
+</div>`);
+
+// 19b prototype lesson — UI spec là một phần của harness
+slides.push(`<div class="slide">
+  <span class="eyebrow">Bài học · Repo là spec (cho cả UI)</span>
+  <h2>Muốn output ĐẸP? Đưa prototype vào harness</h2>
+  <p class="lead">Triệu chứng thật: agent build xong UI <strong>thô &amp; xấu</strong>. Không phải lỗi model — harness chỉ mô tả <em>tính năng</em>, KHÔNG có <em>spec giao diện</em> để bám.</p>
+  <div class="grid g2" style="align-items:start">
+    <div class="note"><h3>❌ Không có prototype → UI rất xấu</h3>
+      <p style="margin:.2em 0 10px">feature_list chỉ ghi "trang danh sách + form" → agent tự suy diễn → HTML trần, không style, lệch nhau mỗi phiên:</p>
+      <figure style="margin:0">
+        <img src="assets/ugly-ui-no-prototype.png" alt="Giao diện kết quả không có prototype — HTML thô không style"
+             style="width:100%;border-radius:10px;border:1px solid var(--line);display:block" />
+        <figcaption class="muted" style="font-size:12.5px;margin-top:6px">↑ Output thật ở <code class="inl">localhost:5173</code> khi harness thiếu spec giao diện.</figcaption>
+      </figure></div>
+    <div class="why"><h3>✔ Có prototype HTML/CSS</h3>
+      <p style="margin:.2em 0">Thêm <code class="inl">docs/prototype/</code>: design tokens + app-shell (sidebar + topbar) + bảng (avatar/badge/lương VND) + modal + auth. Agent bám theo → output <strong>đẹp &amp; nhất quán</strong> mỗi phiên.</p></div>
+  </div>
+  <div class="card tight" style="margin-top:14px"><h3>🔌 Nối prototype vào harness (để agent THẬT SỰ dùng)</h3>
+    <ul style="margin:.2em 0">
+      <li><strong>AGENTS.md</strong>: trỏ <code class="inl">docs/prototype/</code> là nguồn sự thật về UI + ràng buộc "không xuất HTML thô".</li>
+      <li><strong>feat-007</strong>: định nghĩa = "hiện thực hóa giao diện theo prototype, nhìn TƯƠNG ĐƯƠNG".</li>
+      <li><strong>docs/PRODUCT.md · ARCHITECTURE.md</strong>: link tới prototype + design tokens (<code class="inl">styles.css</code>).</li>
+    </ul></div>
+  <p class="muted" style="margin-top:10px">Đây là <strong>ablation của subsystem Hướng dẫn ở tầng UI</strong>: thiếu artifact thiết kế = năng lực model không hiện thực hóa thành giao diện đẹp. Prototype = "đưa bản đồ giao diện", không bắt agent đoán.</p>
+</div>`);
+
+// 20 demo - plan prompt
+slides.push(`<div class="slide">
+  <span class="eyebrow">Demo · Chạy plan với Claude Code</span>
+  <h2>Plan học viên dán cho agent</h2>
+  <p class="muted">Repo đã có sẵn harness. AGENTS.md là nguồn sự thật, <code class="inl">docs/prototype/</code> là spec giao diện. Plan yêu cầu agent làm <strong>TẤT CẢ feat-001 → feat-009 tới khi xong hết</strong>, bám prototype cho UI, TÔN TRỌNG harness.</p>
+  ${codeBlock("planPrompt → Claude Code", planPrompt)}
+</div>`);
+
+// 20b how harness runs on receiving the plan (diagram)
+function hstep(pill, title, desc, hl){
+  return `<div style="display:flex;align-items:center;gap:14px;background:${hl?'rgba(70,224,200,.07)':'var(--panel)'};
+    border:1px solid ${hl?'var(--accent2)':'var(--line)'};border-radius:12px;padding:11px 15px">
+    <span class="${pill.cls}" style="flex:0 0 auto;min-width:158px;text-align:center;display:inline-block">${pill.txt}</span>
+    <div style="min-width:0"><b style="display:block;font-size:15.5px">${title}</b>
+      <span style="font-size:13.5px;color:var(--muted)">${desc}</span></div>
+  </div>`;
+}
+const conn = (lbl)=>`<div style="text-align:center;color:var(--muted);font-size:13px;line-height:1;padding:4px 0">↓${lbl?` <span style="font-size:11px;letter-spacing:.04em">${lbl}</span>`:''}</div>`;
+slides.push(`<div class="slide">
+  <span class="eyebrow">Cơ chế · Nhận PLAN → harness chạy gì</span>
+  <h2>1 prompt PLAN kích hoạt cả 5 hệ thống phụ</h2>
+  <p class="lead">Plan không tự viết code — nó khởi động một vòng lặp <strong>act → observe → feedback</strong>, mỗi bước do một subsystem của harness đảm nhiệm.</p>
+  <div style="display:flex;flex-direction:column;margin-top:6px">
+    ${hstep({cls:'pill',txt:'📥 INPUT'}, 'Nhận PLAN từ học viên', '"Làm tất cả feat-001 → feat-009 tới khi xong, bám prototype cho UI, tôn trọng harness."')}
+    ${conn()}
+    ${hstep({cls:'pill guide',txt:'1 · Hướng dẫn'}, 'Đọc luật chơi + UI spec', 'AGENTS.md/CLAUDE.md + docs/ + docs/prototype/ → stack cố định, định nghĩa DONE, giao diện mục tiêu.')}
+    ${conn()}
+    ${hstep({cls:'pill state',txt:'4 · Trạng thái'}, 'Chọn ĐÚNG 1 feature', 'feature_list.json (DAG) + progress.md → feature "not-started" có dependency đã "done" → đặt "in-progress".')}
+    ${conn()}
+    ${hstep({cls:'pill env',txt:'2·3 · Công cụ+MT'}, 'Code feature', 'shell/files/tests · npm scripts · MySQL docker. UI bám docs/prototype/ (design tokens + app-shell).')}
+    ${conn('FAIL ↺ quay lại Code')}
+    ${hstep({cls:'pill fb',txt:'5 · Phản hồi ⭐'}, 'init.sh verify', 'check · lint · test · build · migration → PASS/FAIL. FAIL thì lặp lại bước Code (vòng khép kín).', true)}
+    ${conn('PASS')}
+    ${hstep({cls:'pill state',txt:'Trạng thái+Vòng đời'}, 'Chốt & bàn giao', 'Dán evidence THẬT → feature "done"; cập nhật progress.md + session-handoff.md; để clean state.')}
+  </div>
+  <p class="muted" style="margin-top:10px">↻ Lặp tới khi <strong>mọi feature "done"</strong>. "Người làm" (code) tách khỏi "người kiểm" (init.sh) — agent tự biết pass/fail, không cần trọng tài từng bước.</p>
+</div>`);
+
+// 21-22 demo steps split
+function stepCard(s){
+  return `<div class="card tight" style="margin:10px 0">
+    <h3><span class="stepnum">${s.n}</span>${esc(s.a)}</h3>
+    <span class="cmd" style="margin:6px 0">$ ${esc(s.c)}</span>
+    <p style="font-size:14.5px;margin:.4em 0;color:#bfe6ff"><strong style="color:var(--accent2)">↳</strong> ${esc(s.r)}</p>
+  </div>`;
+}
+slides.push(`<div class="slide">
+  <span class="eyebrow">Demo · Session steps (1–5)</span>
+  <h2>act → observe → feedback (feat-001 → feat-003)</h2>
+  ${steps.slice(0,5).map(stepCard).join("")}
+</div>`);
+slides.push(`<div class="slide">
+  <span class="eyebrow">Demo · Session steps (6–10)</span>
+  <h2>feat-004 → feat-009 (CRUD → Auth → UI → E2E)</h2>
+  ${steps.slice(5).map(stepCard).join("")}
+  <p class="muted" style="margin-top:6px">⟳ <strong>Loop engineering tại chỗ</strong>: act → observe (đọc verify) → feedback → lặp; chạy LIÊN TỤC tới khi <strong>cả 9 feature 'done'</strong> (init.sh xanh, UI khớp prototype, E2E pass).</p>
+</div>`);
+
+// 23 verification evidence
+slides.push(`<div class="slide">
+  <span class="eyebrow">Demo · Verification Evidence</span>
+  <h2>Bằng chứng verify thật (dán vào evidence)</h2>
+  ${evi.map(e=>`<div class="card tight" style="margin:10px 0">
+    <h3 style="font-size:16px">✔ ${esc(e.check)}</h3>
+    <span class="cmd" style="margin:4px 0">$ ${esc(e.cmd)}</span>
+    <div class="evi-out">${esc(e.out)}</div>
+  </div>`).join("")}
+</div>`);
+
+// 24 final feature states
+slides.push(`<div class="slide">
+  <span class="eyebrow">Demo · Final feature states</span>
+  <h2>feature_list.json sau phiên</h2>
+  <div class="card tight">
+  <table>
+    <tr><th>ID</th><th>Tên</th><th>Status</th><th>Evidence / Ghi chú</th></tr>
+    ${finalStates.map(f=>`<tr>
+      <td class="art">${f[0]}</td><td>${esc(f[1])}</td>
+      <td>${f[2]==="done"?'<span class="pill fb">done</span>':'<span class="pill state">not-started</span>'}</td>
+      <td style="font-size:13.5px;color:#c7d2f4">${esc(f[3])}</td></tr>`).join("")}
+  </table>
+  </div>
+  <p class="muted" style="margin-top:10px">Bất biến giữ vững: luôn 1 feature in-progress/lúc, tôn trọng DAG, evidence là output THẬT chứ không phải lời hứa. <strong>Toàn bộ feat-001 → feat-009 'done'</strong> — plan chạy từ đầu tới cuối, init.sh xanh, UI khớp prototype.</p>
+</div>`);
+
+// 25 team adoption
+slides.push(`<div class="slide">
+  <span class="eyebrow">Team Adoption</span>
+  <h2>Harness là hạ tầng dùng chung</h2>
+  <div class="grid g2">
+    <div class="card"><h3>📥 Commit &amp; review</h3><p>Harness commit vào repo, review trong PR <strong>như code thật</strong> — không phải file cá nhân để ngoài git. Reviewer kiểm AGENTS.md có khớp stack mới không, init.sh còn xanh không.</p></div>
+    <div class="card"><h3>🧹 Harness debt</h3><p>Giống tech debt: AGENTS.md lỗi thời, init.sh thiếu bước, feature_list lệch thực tế. Phải kiểm tra &amp; <strong>trả nợ định kỳ</strong>.</p></div>
+    <div class="card"><h3>✨ Clean state</h3><p>Mỗi phiên để lại clean state để người/agent tiếp theo chạy init.sh ngay — không dọn dẹp thủ công.</p></div>
+    <div class="card"><h3>🔁 Mỗi PR qua init.sh</h3><p>Harness xanh là điều kiện merge — biến quy ước thành cổng chất lượng tự động.</p></div>
+  </div>
+  <div class="note" style="margin-top:14px"><h3>Ví dụ harness debt</h3><p style="margin:.2em 0">Đổi Node 20 → 22 nhưng quên cập nhật <code class="inl">.nvmrc</code> và AGENTS.md → phiên sau init.sh đỏ vô cớ.</p></div>
+</div>`);
+
+// 26 cross-model
+slides.push(`<div class="slide">
+  <span class="eyebrow">Cross-Model</span>
+  <h2>Một harness chạy nhiều model &amp; tiến hóa theo model</h2>
+  <div class="grid g2">
+    <div class="card"><h3>📚 AGENTS.md = chuẩn chung</h3><p>Codex/OpenAI, Cursor và nhiều agent đều đọc <strong>AGENTS.md</strong>; CLAUDE.md riêng cho Claude Code.</p></div>
+    <div class="card"><h3>🔗 Mẹo 1 harness nhiều model</h3><p>Dùng AGENTS.md làm nguồn, để CLAUDE.md là <strong>symlink/stub</strong> trỏ về AGENTS.md ⇒ không maintain 2 bản.</p>
+      <span class="cmd" style="margin-top:6px">ln -s AGENTS.md CLAUDE.md</span></div>
+  </div>
+  <div class="why" style="margin-top:14px"><h3>Harness phải TIẾN HÓA</h3><p style="margin:.2em 0">Khi model mạnh lên, một số subsystem mất vai trò tối quan trọng — nhưng <strong>luôn xuất hiện subsystem tối quan trọng MỚI</strong>. Liên hệ ablation: với model yếu, file tiến độ (Trạng thái) là tối quan trọng; với model mạnh hơn, trọng tâm dịch sang điều phối vòng lặp (Loop).</p></div>
+</div>`);
+
+// 27 showcase
+slides.push(`<div class="slide">
+  <span class="eyebrow">Showcase · Dự án thật</span>
+  <h2>megamind-ai-boilerplate — Harness + CodeGraph</h2>
+  <p class="lead">Boilerplate sản xuất áp dụng đủ 5 hệ thống phụ + một <strong>CodeGraph</strong> (đồ thị code) để agent điều hướng repo lớn mà không phải đọc lại toàn bộ.</p>
+  <div class="grid g2">
+    <div class="card"><h3>⚡ Tốc độ làm feature ×2</h3><p>So với dùng <strong>superpower</strong>, thời gian hoàn tất một feature giảm còn <strong>~một nửa</strong> — harness + CodeGraph cho agent ngữ cảnh đúng ngay từ đầu.</p></div>
+    <div class="card"><h3>🕐 Plan dài chạy hàng giờ</h3><p>Agent chạy plan nhiều giờ <strong>không dừng</strong>: act → verify → feedback lặp liên tục, không cần người can thiệp giữa chừng.</p></div>
+    <div class="card"><h3>🧠 Không đầy context window</h3><p>CodeGraph + Trạng thái (feature_list/progress) thay cho việc nhồi cả repo vào prompt ⇒ <strong>không tràn context</strong> dù codebase lớn.</p></div>
+    <div class="card"><h3>🕸️ CodeGraph là gì</h3><p>Đồ thị symbol/định nghĩa/tham chiếu — agent truy vấn đúng phần cần sửa thay vì grep mù, giữ context gọn &amp; chính xác.</p></div>
+  </div>
+  <div class="note" style="margin-top:14px"><h3>Liên hệ bài học</h3><p style="margin:.2em 0">Đây chính là <strong>Loop engineering</strong> ở quy mô thật: harness vững (5 subsystem) + CodeGraph làm lớp truy hồi ngữ cảnh ⇒ vòng lặp dài, ổn định, ROI rõ rệt.</p></div>
+</div>`);
+
+// 28 summary
+slides.push(`<div class="slide title-slide">
+  <span class="eyebrow">Tổng kết</span>
+  <h2 style="font-size:40px">3 ý nhớ &amp; hành động ngay</h2>
+  <div class="grid g3" style="margin:8px 0 18px">
+    <div class="card tight"><h3>1️⃣ Định nghĩa</h3><p style="font-size:15.5px">Harness = mọi thứ <strong>ngoài trọng số model</strong>. Repo là spec.</p></div>
+    <div class="card tight"><h3>2️⃣ Khung</h3><p style="font-size:15.5px"><strong>5 subsystem + 5 file lõi</strong> ánh xạ rõ ràng.</p></div>
+    <div class="card tight"><h3>3️⃣ ROI</h3><p style="font-size:15.5px"><strong>Phản hồi (init.sh)</strong> ROI cao nhất — đầu tư trước.</p></div>
+  </div>
+  <ul>
+    <li><strong>Hành động ngay:</strong> copy 5 file vào repo của bạn tuần này, commit, review trong PR; giữ clean state mỗi phiên.</li>
+    <li><strong>Đa-model &amp; tiến hóa:</strong> AGENTS.md làm nguồn, CLAUDE.md symlink; harness phải tiến hóa khi model mạnh lên.</li>
+  </ul>
+  <div class="author" style="margin-top:20px">
+    <span class="badge"><strong>Đỗ Ngọc Quang</strong> — AI Engineering</span>
+    <span class="badge">✉️ quangdn@omegatheme.com</span>
+    <span class="badge">💬 Q&amp;A</span>
+  </div>
+</div>`);
+
+// 29 final project — Shopify App cuối khoá
+slides.push(`<div class="slide">
+  <span class="eyebrow">Project cuối khoá</span>
+  <h2>Làm một Shopify App — áp dụng cả khoá học</h2>
+  <div class="card" style="border-color:#4a3e92;background:linear-gradient(180deg,#1d2350,#231a47)">
+    <p style="font-size:18.5px;line-height:1.5;margin:.2em 0">👉 Mỗi người làm <strong>một Shopify App</strong>, áp dụng kiến thức đã học ở các buổi trước vào quá trình thực hiện, sau đó <strong>trình bày lại</strong>: app giúp ích gì, <strong>AI/Harness đã hỗ trợ thế nào</strong>, và kết quả đạt được ra sao.</p>
+  </div>
+  <div class="grid g2" style="margin-top:16px;align-items:start">
+    <div class="card tight"><h3>🛍️ Demo Shopify App</h3>
+      <ul style="margin:.2em 0">
+        <li>Có thể là app <strong>đơn giản</strong>, nhưng phải thể hiện được cách áp dụng kiến thức từ khoá học.</li>
+        <li>Không yêu cầu sản phẩm quá lớn — ưu tiên <strong>rõ logic, rõ cách làm</strong> và <strong>demo được</strong>.</li>
+      </ul></div>
+    <div class="card tight"><h3>🎤 Phần trình bày ngắn — mỗi cá nhân chuẩn bị</h3>
+      <ul style="margin:.2em 0">
+        <li><strong>Mục tiêu</strong> của app là gì?</li>
+        <li>Đã <strong>áp dụng kiến thức nào</strong> từ khoá học?</li>
+        <li><strong>AI đã hỗ trợ</strong> phần nào trong quá trình làm?</li>
+        <li><strong>Kết quả</strong> đạt được là gì?</li>
+        <li><strong>Khó khăn</strong> gặp phải và cách xử lý.</li>
+        <li><strong>Bài học</strong> rút ra sau project.</li>
+      </ul></div>
+  </div>
+  <div class="why" style="margin-top:14px"><h3>Ví dụ kiến thức cần thể hiện</h3>
+    <div class="tag-row" style="margin:.3em 0 0">
+      <span class="pill">planning</span><span class="pill">delegation</span>
+      <span class="pill">prompt / context engineering</span><span class="pill">Claude Code</span>
+      <span class="pill guide">CLAUDE.md / AGENTS.md</span><span class="pill env">hooks / permissions</span>
+      <span class="pill fb">verification</span><span class="pill fb">testing</span>
+      <span class="pill state">guardrails</span><span class="pill life">harness workflow</span>
+    </div>
+  </div>
+  <div class="grid g2" style="margin-top:14px;align-items:start">
+    <div class="card tight"><h3>📦 Tài liệu / output cần có</h3>
+      <ul style="margin:.2em 0">
+        <li>Link <strong>repo/source code</strong> hoặc link <strong>demo</strong> (nếu có).</li>
+        <li><strong>File/slide</strong> trình bày ngắn.</li>
+        <li><strong>Ghi chú ngắn về workflow</strong> sử dụng AI/Harness trong quá trình làm project.</li>
+      </ul></div>
+    <div class="note" style="margin-top:0"><h3>⏰ Deadline</h3>
+      <p style="margin:.2em 0;font-size:16px">Submit qua <strong>Form</strong> trước <strong>14h thứ Ba ngày 30/6</strong>.</p>
+      <p class="muted" style="font-size:13.5px;margin:.4em 0 0">Nộp: link repo/demo + slide trình bày + ghi chú workflow AI/Harness.</p>
+    </div>
+  </div>
+</div>`);
+
+/* ---------- render & engine ---------- */
+const deck = document.getElementById("deck");
+deck.innerHTML = slides.join("");
+const slideEls = Array.from(deck.querySelectorAll(".slide"));
+const N = slideEls.length;
+let cur = 0;
+
+const counter = document.getElementById("counter");
+const progress = document.getElementById("progress");
+const prevBtn = document.getElementById("prev");
+const nextBtn = document.getElementById("next");
+
+function show(i){
+  cur = Math.max(0, Math.min(N-1, i));
+  slideEls.forEach((s,k)=>s.classList.toggle("active",k===cur));
+  counter.textContent = (cur+1)+" / "+N;
+  progress.style.width = ((cur+1)/N*100)+"%";
+  prevBtn.disabled = cur===0;
+  nextBtn.disabled = cur===N-1;
+  const a = slideEls[cur]; if(a) a.scrollTop = 0;
+  try{ location.hash = "s"+(cur+1); }catch(e){}
+}
+function nextS(){ show(cur+1); }
+function prevS(){ show(cur-1); }
+
+prevBtn.addEventListener("click",prevS);
+nextBtn.addEventListener("click",nextS);
+
+document.addEventListener("keydown",e=>{
+  if(e.key==="ArrowRight"||e.key===" "||e.key==="PageDown"){ e.preventDefault(); nextS(); }
+  else if(e.key==="ArrowLeft"||e.key==="PageUp"){ e.preventDefault(); prevS(); }
+  else if(e.key==="Home"){ e.preventDefault(); show(0); }
+  else if(e.key==="End"){ e.preventDefault(); show(N-1); }
+});
+
+/* copy buttons (event delegation, with fallback) */
+deck.addEventListener("click",e=>{
+  const btn = e.target.closest(".copybtn");
+  if(!btn) return;
+  const pre = document.getElementById(btn.dataset.target);
+  if(!pre) return;
+  const text = pre.innerText;
+  const done = ()=>{ const o=btn.textContent; btn.textContent="✓ Đã copy"; btn.classList.add("ok");
+    setTimeout(()=>{ btn.textContent=o; btn.classList.remove("ok"); },1400); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(()=>fallback(text,done));
+  } else fallback(text,done);
+});
+function fallback(text,done){
+  try{
+    const ta=document.createElement("textarea");
+    ta.value=text; ta.style.position="fixed"; ta.style.opacity="0"; ta.style.top="0";
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    document.execCommand("copy"); document.body.removeChild(ta); done();
+  }catch(err){ /* noop */ }
+}
+
+/* deep-link via hash */
+(function(){
+  const m = /^#s(\d+)$/.exec(location.hash);
+  show(m ? parseInt(m[1],10)-1 : 0);
+})();
+</script>
+</body>
+</html>

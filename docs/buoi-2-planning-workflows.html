@@ -1,0 +1,2201 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<title>Buổi 2 — Planning, Delegation & Structured Workflows</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ───── Dark theme (default) ───── */
+  :root,
+  [data-theme="dark"] {
+    --bg: #0a0f0d;
+    --bg-2: #0d1411;
+    --green: #4ade80;
+    --green-bright: #6ee7a0;
+    --green-glow: rgba(74, 222, 128, 0.15);
+    --orange: #f5a623;
+    --blue: #6cb3ff;
+    --purple: #c084fc;
+    --red: #f87171;
+    --text: #e8efe9;
+    --text-strong: #ffffff;
+    --muted: #6b7a70;
+    --grid-line: rgba(74, 222, 128, 0.03);
+    --progress-track: rgba(255, 255, 255, 0.05);
+    --box-bg-start: rgba(74, 222, 128, 0.06);
+    --box-bg-end: rgba(74, 222, 128, 0.02);
+    --highlight-bg: rgba(74, 222, 128, 0.12);
+    --highlight-border: rgba(74, 222, 128, 0.3);
+    --info-bg: rgba(108, 179, 255, 0.06);
+    --warn-bg: rgba(245, 166, 35, 0.08);
+    --bar-track: rgba(255, 255, 255, 0.04);
+  }
+
+  /* ───── Light theme ───── */
+  [data-theme="light"] {
+    --bg: #f5f7f4;
+    --bg-2: #ffffff;
+    --green: #16a34a;
+    --green-bright: #15803d;
+    --green-glow: rgba(22, 163, 74, 0.18);
+    --orange: #b8740a;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+    --red: #dc2626;
+    --text: #1f2421;
+    --text-strong: #0a0f0d;
+    --muted: #6b7a70;
+    --grid-line: rgba(22, 163, 74, 0.05);
+    --progress-track: rgba(0, 0, 0, 0.08);
+    --box-bg-start: rgba(22, 163, 74, 0.08);
+    --box-bg-end: rgba(22, 163, 74, 0.02);
+    --highlight-bg: rgba(22, 163, 74, 0.12);
+    --highlight-border: rgba(22, 163, 74, 0.35);
+    --info-bg: rgba(37, 99, 235, 0.06);
+    --warn-bg: rgba(184, 116, 10, 0.08);
+    --bar-track: rgba(0, 0, 0, 0.06);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "JetBrains Mono", "Fira Code", "Courier New", monospace;
+    font-feature-settings: "calt" 1, "liga" 1, "ss01" 1;
+    overflow: hidden;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  .deck { position: relative; width: 100vw; height: 100vh; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    padding: 5vh 8vw;
+    display: none;
+    flex-direction: column;
+    gap: 2vh;
+    background:
+      radial-gradient(ellipse at top left, var(--green-glow), transparent 60%),
+      var(--bg);
+    transition: background 0.3s ease;
+    overflow: hidden;
+  }
+
+  .slide.active { display: flex; animation: fadeIn 0.35s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .slide::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  .slide > * { position: relative; z-index: 1; }
+
+  .eyebrow {
+    color: var(--green);
+    font-size: 1rem;
+    letter-spacing: 0.12em;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+
+  .title {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 3.6rem;
+    font-weight: 700;
+    color: var(--text-strong);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .title.xl { font-size: 4.5rem; }
+  .title .accent { font-family: "JetBrains Mono", monospace; color: var(--green); font-weight: 700; letter-spacing: -0.04em; }
+  .title .accent-orange { color: var(--orange); }
+  .title .accent-blue { color: var(--blue); }
+
+  .subtitle {
+    font-size: 1.4rem;
+    color: var(--muted);
+    font-weight: 400;
+    margin-top: -1vh;
+  }
+
+  /* Content blocks */
+  .content-box {
+    background: linear-gradient(180deg, var(--box-bg-start), var(--box-bg-end));
+    border-left: 3px solid var(--green);
+    padding: 2.5vh 2.5vw;
+    border-radius: 4px;
+    box-shadow: 0 0 40px var(--green-glow);
+  }
+
+  .content-box + .content-box { margin-top: 1.5vh; }
+
+  .lead { font-size: 1.2rem; color: var(--text); margin-bottom: 1.5vh; line-height: 1.5; }
+  .lead + .lead { margin-top: 0; }
+
+  .section-label {
+    color: var(--orange);
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 1.2vh;
+  }
+
+  .bullet-list { list-style: none; margin-bottom: 1.5vh; }
+  .bullet-list li {
+    font-size: 1.1rem;
+    padding: 0.5vh 0 0.5vh 1.6rem;
+    position: relative;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .bullet-list li::before {
+    content: "▸";
+    color: var(--green);
+    position: absolute;
+    left: 0.2rem;
+    font-size: 1rem;
+    top: 0.7vh;
+  }
+
+  .num-list { list-style: none; counter-reset: step; }
+  .num-list > li {
+    counter-increment: step;
+    font-size: 1.1rem;
+    padding: 0.7vh 0 0.7vh 2.6rem;
+    position: relative;
+    color: var(--text);
+    line-height: 1.55;
+  }
+  .num-list > li::before {
+    content: counter(step, decimal-leading-zero);
+    color: var(--green);
+    position: absolute;
+    left: 0;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.95rem;
+    font-weight: 600;
+    top: 0.9vh;
+  }
+  .num-list ul { list-style: none; margin-top: 0.5vh; }
+  .num-list ul li {
+    font-size: 1rem;
+    padding: 0.3vh 0 0.3vh 1.4rem;
+    position: relative;
+    color: var(--muted);
+  }
+  .num-list ul li::before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    color: var(--green);
+  }
+
+  .highlight-box {
+    background: var(--highlight-bg);
+    border: 1px solid var(--highlight-border);
+    padding: 1.3vh 1.4vw;
+    border-radius: 4px;
+    color: var(--green-bright);
+    font-size: 1.1rem;
+    display: inline-block;
+    line-height: 1.5;
+  }
+
+  .info-box {
+    background: var(--info-bg);
+    border-left: 3px solid var(--blue);
+    padding: 1.8vh 1.8vw;
+    border-radius: 4px;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .info-box .info-label { color: var(--blue); font-weight: 600; }
+  .info-box strong { color: var(--text-strong); }
+
+  .warn-box {
+    background: var(--warn-bg);
+    border-left: 3px solid var(--orange);
+    padding: 1.5vh 1.8vw;
+    border-radius: 4px;
+    font-size: 1.05rem;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .warn-box .warn-label { color: var(--orange); font-weight: 600; }
+
+  /* Phase bars (slides 2, 3) — STACKED */
+  .phase-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5vh;
+    margin-top: 2vh;
+  }
+
+  .stacked-bar {
+    height: 56px;
+    background: var(--bar-track);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    box-shadow: inset 0 0 0 1px var(--highlight-border);
+  }
+  .stacked-bar .seg {
+    height: 100%;
+    width: 0;
+    animation: grow 1s ease forwards;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0a0f0d;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .stacked-bar .seg.blue {
+    background: linear-gradient(180deg, #93c5fd, var(--blue));
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15), 0 0 24px rgba(108, 179, 255, 0.25);
+    animation-delay: 0s;
+  }
+  .stacked-bar .seg.green {
+    background: linear-gradient(180deg, var(--green-bright), var(--green));
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15), 0 0 24px var(--green-glow);
+    animation-delay: 0.15s;
+  }
+  .stacked-bar .seg.orange {
+    background: linear-gradient(180deg, #ffb84d, var(--orange));
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15), 0 0 24px rgba(245, 166, 35, 0.25);
+    animation-delay: 0.3s;
+  }
+
+  @keyframes grow { to { width: var(--w); } }
+
+  /* Legend below stacked bar */
+  .legend {
+    display: flex;
+    gap: 2vw;
+    flex-wrap: wrap;
+    margin-top: 1vh;
+  }
+  .legend .item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+  }
+  .legend .swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .legend .swatch.blue   { background: var(--blue); box-shadow: 0 0 8px rgba(108, 179, 255, 0.4); }
+  .legend .swatch.green  { background: var(--green); box-shadow: 0 0 8px var(--green-glow); }
+  .legend .swatch.orange { background: var(--orange); box-shadow: 0 0 8px rgba(245, 166, 35, 0.3); }
+  .legend .name {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    color: var(--text-strong);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .legend .pct {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--muted);
+    margin-left: 6px;
+  }
+
+  /* Two-column layout */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2vw;
+  }
+
+  /* Footer */
+  .footer {
+    position: absolute;
+    bottom: 1.5vh;
+    left: 0;
+    right: 0;
+    padding: 0 2vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--muted);
+    z-index: 2;
+  }
+  .footer .key {
+    display: inline-block;
+    border: 1px solid var(--muted);
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-right: 6px;
+  }
+  .footer .progress {
+    flex: 1;
+    height: 2px;
+    background: var(--progress-track);
+    margin: 0 2vw;
+    position: relative;
+  }
+  .footer .progress::after {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: var(--progress);
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    transition: width 0.3s ease;
+  }
+
+  /* Theme toggle */
+  .theme-toggle {
+    position: fixed;
+    top: 2vh;
+    right: 2vw;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--box-bg-start);
+    border: 1px solid var(--highlight-border);
+    border-radius: 999px;
+    color: var(--text);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(8px);
+  }
+  .theme-toggle:hover { background: var(--highlight-bg); box-shadow: 0 0 20px var(--green-glow); transform: translateY(-1px); }
+  .theme-toggle svg { width: 14px; height: 14px; stroke: var(--green); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  [data-theme="dark"]  .theme-toggle .icon-sun  { display: block; }
+  [data-theme="dark"]  .theme-toggle .icon-moon { display: none; }
+  [data-theme="light"] .theme-toggle .icon-sun  { display: none; }
+  [data-theme="light"] .theme-toggle .icon-moon { display: block; }
+
+  /* Nav arrows */
+  .nav {
+    position: fixed;
+    bottom: 4vh;
+    right: 2vw;
+    z-index: 20;
+    display: flex;
+    gap: 8px;
+  }
+  .nav button {
+    width: 38px; height: 38px;
+    background: var(--box-bg-start);
+    border: 1px solid var(--highlight-border);
+    border-radius: 8px;
+    color: var(--green);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav button:hover { background: var(--highlight-bg); box-shadow: 0 0 12px var(--green-glow); }
+  .nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* Cover slide */
+  .cover {
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .cover .badge {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--green);
+    font-size: 1rem;
+    letter-spacing: 0.15em;
+    margin-bottom: 2vh;
+    padding: 6px 12px;
+    border: 1px solid var(--highlight-border);
+    border-radius: 999px;
+    display: inline-block;
+    background: var(--highlight-bg);
+  }
+  .cover .title { font-size: 5.5rem; line-height: 1.05; }
+  .cover .meta {
+    margin-top: 3vh;
+    font-size: 1.1rem;
+    color: var(--muted);
+    display: flex;
+    gap: 1.5vw;
+    align-items: center;
+  }
+  .cover .meta .dot { color: var(--green); }
+
+  /* Cite/quote */
+  .cite {
+    margin-top: 1vh;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 1rem;
+  }
+
+  .question {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 2rem;
+    color: var(--text-strong);
+    font-weight: 600;
+    line-height: 1.3;
+    padding: 2vh 0;
+  }
+  .question .accent { color: var(--green); font-family: "JetBrains Mono", monospace; }
+
+  /* ───── Illustrations ───── */
+  .illu {
+    position: absolute;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.85;
+  }
+  .illu svg { width: 100%; height: 100%; overflow: visible; }
+  .illu svg * {
+    stroke: var(--green);
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .illu svg .fill { fill: var(--green); stroke: none; opacity: 0.15; }
+  .illu svg .dim  { stroke: var(--muted); opacity: 0.5; }
+  .illu svg .accent-orange { stroke: var(--orange); }
+  .illu svg .accent-blue   { stroke: var(--blue); }
+
+  /* Default position: top-right corner, decorative */
+  .illu.corner {
+    top: 8vh;
+    right: 6vw;
+    width: 180px;
+    height: 180px;
+  }
+  /* Larger feature illustration on slides with less content */
+  .illu.feature {
+    top: 18vh;
+    right: 6vw;
+    width: 320px;
+    height: 320px;
+    opacity: 0.95;
+  }
+  /* Cover slide — large background-style illustration */
+  .illu.cover-art {
+    top: 50%;
+    right: 5vw;
+    transform: translateY(-50%);
+    width: 420px;
+    height: 420px;
+    opacity: 0.9;
+  }
+
+  @media (max-width: 1100px) {
+    .illu.corner   { width: 130px; height: 130px; }
+    .illu.feature  { width: 220px; height: 220px; }
+    .illu.cover-art { width: 280px; height: 280px; }
+  }
+
+  /* Soft pulse animation for circuit-style illustrations */
+  @keyframes pulse {
+    0%, 100% { opacity: 0.85; }
+    50%      { opacity: 1; }
+  }
+  .illu.pulse { animation: pulse 3s ease-in-out infinite; }
+
+  /* ───── Workflow steps (NEW-A) ───── */
+  .workflow {
+    display: flex;
+    align-items: center;
+    gap: 0.6vw;
+    margin-top: 2vh;
+    flex-wrap: wrap;
+  }
+  .workflow .step {
+    flex: 1;
+    min-width: 100px;
+    background: var(--box-bg-start);
+    border: 1px solid var(--highlight-border);
+    border-radius: 6px;
+    padding: 1.5vh 1vw;
+    text-align: center;
+    position: relative;
+  }
+  .workflow .step .num {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--green);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+  }
+  .workflow .step .name {
+    font-family: "Space Grotesk", sans-serif;
+    color: var(--text-strong);
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 0.5vh;
+  }
+  .workflow .arrow {
+    color: var(--green);
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+  .workflow-loop {
+    margin-top: 1.5vh;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.95rem;
+    font-style: italic;
+    position: relative;
+  }
+  .workflow-loop::before {
+    content: "↻";
+    color: var(--green);
+    margin-right: 8px;
+    font-size: 1.2rem;
+  }
+
+  /* ───── Anti-patterns (NEW-B) ───── */
+  .anti-list { list-style: none; }
+  .anti-list li {
+    font-size: 1.1rem;
+    padding: 0.8vh 0 0.8vh 2rem;
+    position: relative;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .anti-list li::before {
+    content: "✕";
+    color: var(--red);
+    position: absolute;
+    left: 0.3rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    top: 0.9vh;
+  }
+
+  /* ───── Compare two columns (NEW-C) ───── */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2vw;
+    margin-top: 1.5vh;
+  }
+  .compare .col {
+    border-radius: 6px;
+    padding: 2vh 1.5vw;
+    border-left: 3px solid;
+  }
+  .compare .col.bad {
+    background: rgba(248, 113, 113, 0.06);
+    border-color: var(--red);
+  }
+  .compare .col.good {
+    background: var(--box-bg-start);
+    border-color: var(--green);
+  }
+  .compare .col .label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    margin-bottom: 1vh;
+    text-transform: uppercase;
+  }
+  .compare .col.bad  .label { color: var(--red); }
+  .compare .col.good .label { color: var(--green); }
+  .compare .col .quote {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.95rem;
+    color: var(--text);
+    line-height: 1.55;
+    padding: 1vh 0;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    margin: 0.8vh 0;
+  }
+  .compare .col .note {
+    font-size: 0.92rem;
+    color: var(--muted);
+    margin-top: 0.8vh;
+    line-height: 1.5;
+  }
+
+  /* ───── Checklist (slide 19) ───── */
+  .checklist { list-style: none; }
+  .checklist li {
+    font-size: 1.05rem;
+    padding: 0.6vh 0 0.6vh 2rem;
+    position: relative;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .checklist li::before {
+    content: "";
+    position: absolute;
+    left: 0.2rem;
+    top: 1.1vh;
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--green);
+    border-radius: 3px;
+  }
+
+  /* ───── Agenda ───── */
+  .agenda {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8vh;
+    margin-top: 1.5vh;
+  }
+  .agenda-item {
+    display: grid;
+    grid-template-columns: 50px 1fr auto;
+    align-items: center;
+    gap: 1.5vw;
+    padding: 1.5vh 1.5vw;
+    background: var(--box-bg-start);
+    border-left: 3px solid var(--green);
+    border-radius: 4px;
+    transition: transform 0.2s ease;
+  }
+  .agenda-item:hover { transform: translateX(4px); }
+  .agenda-item .ag-num {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--green);
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  .agenda-item .ag-title {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--text-strong);
+  }
+  .agenda-item .ag-sub {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .agenda-item .ag-time {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.85rem;
+    color: var(--orange);
+    background: rgba(245, 166, 35, 0.1);
+    border: 1px solid rgba(245, 166, 35, 0.3);
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .agenda-break {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.8vh 1.5vw;
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+  }
+  .agenda-break::before, .agenda-break::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--highlight-border);
+  }
+
+  /* ───── Comparison table (Why English) ───── */
+  .compare-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 1.5vh;
+    font-size: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--highlight-border);
+  }
+  .compare-table th, .compare-table td {
+    padding: 1.2vh 1.2vw;
+    text-align: left;
+    border-bottom: 1px solid var(--highlight-border);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .compare-table tr:last-child th, .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table thead th {
+    background: rgba(0,0,0,0.2);
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    color: var(--text-strong);
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  [data-theme="light"] .compare-table thead th { background: rgba(0,0,0,0.05); }
+  .compare-table thead th.col-en {
+    color: var(--green);
+    border-left: 3px solid var(--green);
+  }
+  .compare-table thead th.col-other {
+    color: var(--red);
+    border-left: 3px solid var(--red);
+  }
+  .compare-table tbody .factor {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-weight: 600;
+    width: 22%;
+  }
+  .compare-table tbody td.cell-en {
+    color: var(--text-strong);
+    background: rgba(74, 222, 128, 0.05);
+    border-left: 3px solid var(--green);
+  }
+  [data-theme="light"] .compare-table tbody td.cell-en { background: rgba(22, 163, 74, 0.06); }
+  .compare-table tbody td.cell-other {
+    color: var(--muted);
+    border-left: 3px solid rgba(248, 113, 113, 0.3);
+  }
+  .compare-table tbody tr:hover td.cell-en { background: rgba(74, 222, 128, 0.1); }
+
+  /* ───── Reveal mechanic (progressive disclosure) ───── */
+  [data-reveal] {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(4px);
+    transition: opacity 0.35s ease, transform 0.35s ease, visibility 0s 0.35s;
+  }
+  [data-reveal].shown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: opacity 0.35s ease, transform 0.35s ease, visibility 0s;
+  }
+
+  /* Next-hint chip — shows on slides with hidden reveals */
+  .next-hint {
+    position: absolute;
+    bottom: 5vh;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 14px;
+    background: rgba(245, 166, 35, 0.12);
+    border: 1px solid rgba(245, 166, 35, 0.35);
+    border-radius: 999px;
+    color: var(--orange);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    z-index: 5;
+    animation: nudge 2s ease-in-out infinite;
+  }
+  .next-hint::after {
+    content: " →";
+    margin-left: 2px;
+  }
+  @keyframes nudge {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50%      { transform: translateX(-50%) translateY(-3px); }
+  }
+
+  /* ───── Business vs UX exercise ───── */
+  .bux-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    margin-top: 1.5vh;
+  }
+  .bux-row {
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    align-items: center;
+    gap: 1vw;
+    padding: 1.3vh 1.2vw;
+    background: var(--box-bg-start);
+    border: 1px solid var(--highlight-border);
+    border-radius: 6px;
+  }
+  .bux-row .bux-num {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--orange);
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+  .bux-row .bux-q {
+    font-size: 1.05rem;
+    color: var(--text);
+    line-height: 1.4;
+    font-style: italic;
+  }
+  .bux-row .bux-opts {
+    display: flex;
+    gap: 8px;
+  }
+  .bux-opt {
+    padding: 4px 12px;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    border-radius: 999px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    position: relative;
+  }
+  [data-theme="light"] .bux-opt { border-color: rgba(0,0,0,0.15); }
+  .bux-opt::before {
+    content: "";
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    border: 1.5px solid currentColor;
+    border-radius: 3px;
+    margin-right: 6px;
+    vertical-align: -2px;
+  }
+  .bux-row.shown .bux-opt.correct.biz {
+    border-color: var(--blue);
+    color: var(--blue);
+    background: rgba(108, 179, 255, 0.12);
+  }
+  .bux-row.shown .bux-opt.correct.ux {
+    border-color: var(--purple);
+    color: var(--purple);
+    background: rgba(192, 132, 252, 0.12);
+  }
+  .bux-row.shown .bux-opt.correct::before {
+    background: currentColor;
+    content: "✓";
+    color: var(--bg);
+    border: 1.5px solid transparent;
+    text-align: center;
+    line-height: 11px;
+    font-size: 9px;
+    font-weight: 700;
+  }
+
+  /* ───── INTERACTIVE slides ───── */
+  .slide.interact {
+    background:
+      radial-gradient(ellipse at top left, rgba(245, 166, 35, 0.08), transparent 60%),
+      radial-gradient(ellipse at bottom right, rgba(192, 132, 252, 0.05), transparent 50%),
+      var(--bg);
+  }
+  .slide.interact .eyebrow {
+    color: var(--orange);
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .slide.interact .eyebrow::before {
+    content: "▶";
+    color: var(--orange);
+    font-size: 1rem;
+  }
+  .timer-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 12px;
+    padding: 4px 12px;
+    background: rgba(245, 166, 35, 0.15);
+    border: 1px solid rgba(245, 166, 35, 0.4);
+    border-radius: 999px;
+    color: var(--orange);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+  .timer-badge::before { content: "⏱"; }
+
+  .action-box {
+    background: linear-gradient(180deg, rgba(245, 166, 35, 0.08), rgba(245, 166, 35, 0.02));
+    border-left: 4px solid var(--orange);
+    padding: 3vh 3vw;
+    border-radius: 6px;
+    margin-top: 1.5vh;
+    box-shadow: 0 0 40px rgba(245, 166, 35, 0.1);
+  }
+  .action-box .action-num {
+    display: inline-block;
+    background: var(--orange);
+    color: #0a0f0d;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 28px;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-right: 12px;
+    flex-shrink: 0;
+  }
+  .action-box .action-item {
+    display: flex;
+    align-items: flex-start;
+    font-size: 1.15rem;
+    padding: 0.8vh 0;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .action-box .action-item .text { padding-top: 2px; }
+
+  .facilitator-note {
+    margin-top: 1.5vh;
+    padding: 1.2vh 1.5vw;
+    background: rgba(192, 132, 252, 0.06);
+    border-left: 2px solid var(--purple);
+    border-radius: 4px;
+    font-size: 0.95rem;
+    color: var(--muted);
+    font-style: italic;
+  }
+  .facilitator-note .label {
+    color: var(--purple);
+    font-weight: 700;
+    font-style: normal;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    margin-right: 8px;
+    text-transform: uppercase;
+  }
+
+  .quiz-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1vw;
+    margin-top: 1.5vh;
+  }
+  .quiz-card {
+    background: var(--box-bg-start);
+    border: 1px solid var(--highlight-border);
+    border-radius: 6px;
+    padding: 1.5vh 1.2vw;
+    font-size: 1rem;
+    line-height: 1.4;
+    position: relative;
+  }
+  .quiz-card .qnum {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--orange);
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5vh;
+  }
+  .quiz-card .qans {
+    margin-top: 0.8vh;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.78rem;
+    color: var(--green);
+    border-top: 1px dashed var(--highlight-border);
+    padding-top: 0.5vh;
+  }
+
+  .group-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.2vw;
+    margin-top: 1vh;
+  }
+  .group-card {
+    background: var(--box-bg-start);
+    border-left: 3px solid var(--green);
+    border-radius: 4px;
+    padding: 1.5vh 1.2vw;
+  }
+  .group-card .gname {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    color: var(--text-strong);
+    font-size: 1rem;
+    margin-bottom: 0.3vh;
+  }
+  .group-card .gtask {
+    font-size: 0.92rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .group-card.g-a { border-color: var(--green); }
+  .group-card.g-b { border-color: var(--orange); }
+  .group-card.g-c { border-color: var(--blue); }
+  .group-card.g-d { border-color: var(--purple); }
+
+  /* ───── Step chip (tool → workflow step mapping) ───── */
+  .step-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: rgba(108, 179, 255, 0.1);
+    border: 1px solid rgba(108, 179, 255, 0.35);
+    border-radius: 999px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.85rem;
+    color: var(--blue);
+    margin-bottom: 1.5vh;
+  }
+  .step-chip .ico { color: var(--blue); font-size: 0.95rem; }
+  .step-chip .num {
+    color: var(--text-strong);
+    font-weight: 700;
+    background: rgba(108, 179, 255, 0.2);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+  }
+
+  /* ───── Install / shell command block ───── */
+  .cmd {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 1rem;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid var(--highlight-border);
+    border-radius: 6px;
+    padding: 1.2vh 1.2vw;
+    color: var(--text);
+    margin-top: 1vh;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow-x: auto;
+  }
+  [data-theme="light"] .cmd { background: rgba(0,0,0,0.06); }
+  .cmd::before {
+    content: "$";
+    color: var(--green);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .cmd.slash::before { content: "›"; color: var(--green); font-size: 1.1rem; }
+  .cmd .arg { color: var(--orange); }
+  .cmd .flag { color: var(--blue); }
+  .cmd .cmt { color: var(--muted); margin-left: auto; font-style: italic; }
+  .install-label {
+    display: inline-block;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    color: var(--green);
+    text-transform: uppercase;
+    margin-top: 1.5vh;
+    margin-bottom: 0.3vh;
+    font-weight: 600;
+  }
+  .ext-link {
+    color: var(--blue);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--blue);
+    font-size: 0.95rem;
+  }
+  .ext-link:hover { opacity: 0.8; }
+
+  /* ───── Given-When-Then (NEW-E) ───── */
+  .gwt {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6vh;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 1rem;
+    margin-top: 1vh;
+    padding: 1.5vh 1.5vw;
+    background: rgba(0,0,0,0.15);
+    border-radius: 4px;
+    border-left: 2px solid var(--green);
+  }
+  [data-theme="light"] .gwt { background: rgba(0,0,0,0.04); }
+  .gwt .kw {
+    color: var(--green);
+    font-weight: 700;
+    margin-right: 8px;
+  }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+  <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+  <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  <span class="label">THEME</span>
+</button>
+
+<div class="nav">
+  <button id="prevBtn" aria-label="Previous">‹</button>
+  <button id="nextBtn" aria-label="Next">›</button>
+</div>
+
+<div class="deck">
+
+  <!-- ────────── SLIDE 1 ────────── -->
+  <section class="slide cover active" data-slide="1">
+    <div class="badge">// BUỔI 02</div>
+    <h1 class="title">Planning, Delegation<br>& <span class="accent">Structured Workflows</span></h1>
+    <div class="meta">
+      <span>Working with Claude</span>
+      <span class="dot">●</span>
+      <span>28 slides</span>
+      <span class="dot">●</span>
+      <span>~ 2.5h</span>
+    </div>
+    <!-- Illustration: orbiting nodes / structured workflow -->
+    <div class="illu cover-art pulse">
+      <svg viewBox="0 0 200 200">
+        <circle cx="100" cy="100" r="80" class="dim" stroke-dasharray="2 4"/>
+        <circle cx="100" cy="100" r="55" class="dim" stroke-dasharray="2 4"/>
+        <circle cx="100" cy="100" r="30"/>
+        <circle cx="100" cy="100" r="6" class="fill"/>
+        <!-- Nodes on outer ring -->
+        <circle cx="100" cy="20"  r="8"/>
+        <circle cx="170" cy="100" r="8"/>
+        <circle cx="100" cy="180" r="8"/>
+        <circle cx="30"  cy="100" r="8"/>
+        <!-- Lines from center -->
+        <line x1="100" y1="100" x2="100" y2="20"/>
+        <line x1="100" y1="100" x2="170" y2="100"/>
+        <line x1="100" y1="100" x2="100" y2="180"/>
+        <line x1="100" y1="100" x2="30"  y2="100"/>
+        <!-- Inner nodes -->
+        <circle cx="145" cy="55"  r="5" class="accent-orange"/>
+        <circle cx="145" cy="145" r="5" class="accent-blue"/>
+        <circle cx="55"  cy="145" r="5" class="accent-orange"/>
+        <circle cx="55"  cy="55"  r="5" class="accent-blue"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ────────── SLIDE: Agenda ────────── -->
+  <section class="slide" data-slide="2">
+    <div class="eyebrow">// AGENDA</div>
+    <h1 class="title">Buổi học hôm nay — <span class="accent">7 phần</span></h1>
+
+    <div class="agenda">
+      <div class="agenda-item">
+        <div class="ag-num">01</div>
+        <div>
+          <div class="ag-title">Why — Planning là bottleneck mới</div>
+          <div class="ag-sub">Vì sao AI thay đổi tỷ lệ thời gian Planning · Dev · QA</div>
+        </div>
+        <div class="ag-time">~ 15 min</div>
+      </div>
+
+      <div class="agenda-item">
+        <div class="ag-num">02</div>
+        <div>
+          <div class="ag-title">Mindset — Collaboration với Claude</div>
+          <div class="ag-sub">Analogy kiến trúc sư · structured workflow framework (6 bước)</div>
+        </div>
+        <div class="ag-time">~ 20 min</div>
+      </div>
+
+      <div class="agenda-item">
+        <div class="ag-num">03</div>
+        <div>
+          <div class="ag-title">Input — Cung cấp gì cho Claude</div>
+          <div class="ag-sub">Business vs UX · anti-patterns · bad vs good prompt (live demo)</div>
+        </div>
+        <div class="ag-time">~ 25 min</div>
+      </div>
+
+      <div class="agenda-break">— Break —</div>
+
+      <div class="agenda-item">
+        <div class="ag-num">04</div>
+        <div>
+          <div class="ag-title">Output — User stories, AC &amp; classification</div>
+          <div class="ag-sub">Given-When-Then · phân loại tasks 3 nhóm (now/complex/discuss)</div>
+        </div>
+        <div class="ag-time">~ 20 min</div>
+      </div>
+
+      <div class="agenda-item">
+        <div class="ag-num">05</div>
+        <div>
+          <div class="ag-title">Rules — 6 luật chơi bắt buộc</div>
+          <div class="ag-sub">Plan first · plan mode · AC · stop &amp; ask · save file · no skip</div>
+        </div>
+        <div class="ag-time">~ 5 min</div>
+      </div>
+
+      <div class="agenda-item">
+        <div class="ag-num">06</div>
+        <div>
+          <div class="ag-title">Tools — superpowers · codegraph · map-feature · /fork</div>
+          <div class="ag-sub">Cài đặt &amp; live demo · map mỗi tool vào step của framework</div>
+        </div>
+        <div class="ag-time">~ 25 min</div>
+      </div>
+
+      <div class="agenda-item">
+        <div class="ag-num">07</div>
+        <div>
+          <div class="ag-title">Practice — Tự lên 1 plan thật</div>
+          <div class="ag-sub">Mini project mới hoặc 1 feature từ sản phẩm có sẵn</div>
+        </div>
+        <div class="ag-time">~ 30 min</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────── INTERACT #1: Ice-breaker ────────── -->
+  <section class="slide interact" data-slide="3">
+    <div class="eyebrow">// INTERACT <span class="timer-badge">2 min</span></div>
+    <h1 class="title">Mở đầu — <span class="accent-orange" style="color: var(--orange);">show of hands</span></h1>
+
+    <div class="action-box">
+      <div class="action-item"><span class="action-num">?</span><div class="text">Ai từng giao <strong style="color: var(--text-strong);">1 task lớn bằng 1 prompt duy nhất</strong> rồi để Claude tự xử lý hết?</div></div>
+    </div>
+  </section>
+
+  <!-- ────────── SLIDE 2 ────────── -->
+  <section class="slide" data-slide="3">
+    <div class="eyebrow">// TRƯỚC AI</div>
+    <h1 class="title">Phân bổ công việc khi ship 1 tính năng <span class="accent-orange">— before AI</span></h1>
+
+    <div class="content-box">
+      <div class="phase-chart">
+        <div class="stacked-bar">
+          <div class="seg blue"   style="--w: 30%;">Planning · 30%</div>
+          <div class="seg green"  style="--w: 50%;">Development · 50%</div>
+          <div class="seg orange" style="--w: 20%;">QA · 20%</div>
+        </div>
+        <div class="legend">
+          <div class="item"><span class="swatch blue"></span><span class="name">Planning</span><span class="pct">~30%</span></div>
+          <div class="item"><span class="swatch green"></span><span class="name">Development</span><span class="pct">~50%</span></div>
+          <div class="item"><span class="swatch orange"></span><span class="name">QA / Testing</span><span class="pct">~20%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <span class="info-label">Quan sát:</span> Development là phần "ngốn" nhiều thời gian nhất — viết code, debug, refactor.
+    </div>
+  </section>
+
+  <!-- ────────── INTERACT #2: Predict before reveal ────────── -->
+  <section class="slide interact" data-slide="4">
+    <div class="eyebrow">// INTERACT <span class="timer-badge">2 min</span></div>
+    <h1 class="title">Đoán xem — <span class="accent-orange" style="color: var(--orange);">tỷ lệ sẽ là?</span></h1>
+
+    <div class="action-box">
+      <p style="font-size: 1.15rem; line-height: 1.6; color: var(--text); margin-bottom: 1vh;">Vừa rồi: <strong style="color: var(--text-strong);">Planning 30% · Dev 50% · QA 20%</strong> (trước AI).</p>
+      <p style="font-size: 1.3rem; line-height: 1.5; color: var(--text-strong); font-family: 'Space Grotesk', sans-serif; font-weight: 600;">Bây giờ — đoán xem khi có AI, <span style="color: var(--orange);">Planning sẽ chiếm bao nhiêu %?</span></p>
+    </div>
+
+  </section>
+
+  <!-- ────────── SLIDE 3 ────────── -->
+  <section class="slide" data-slide="5">
+    <div class="eyebrow">// VỚI AI</div>
+    <h1 class="title">Phân bổ công việc khi ship 1 tính năng <span class="accent">— with AI</span></h1>
+
+    <div class="content-box">
+      <div class="phase-chart">
+        <div class="stacked-bar">
+          <div class="seg blue"   style="--w: 55%;">Planning · 55%</div>
+          <div class="seg green"  style="--w: 15%;">Dev · 15%</div>
+          <div class="seg orange" style="--w: 30%;">QA · 30%</div>
+        </div>
+        <div class="legend">
+          <div class="item"><span class="swatch blue"></span><span class="name">Planning</span><span class="pct">~50%</span></div>
+          <div class="item"><span class="swatch green"></span><span class="name">Development</span><span class="pct">10 – 20%</span></div>
+          <div class="item"><span class="swatch orange"></span><span class="name">QA / Testing</span><span class="pct">20 – 30%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <span class="info-label">Thay đổi:</span> Development co lại đáng kể, <strong>Planning trở thành giai đoạn chiếm thời gian nhất</strong>.
+    </div>
+  </section>
+
+  <!-- ────────── SLIDE 4 ────────── -->
+  <section class="slide" data-slide="4">
+    <div class="eyebrow">// KẾT LUẬN</div>
+    <h1 class="title">Planning là <span class="accent">bottleneck</span> mới</h1>
+
+    <div class="content-box">
+      <p class="lead">Thời gian dành cho planning khi làm việc với AI developer tăng lên rất nhiều — và đây cũng là bước cần dành <strong style="color: var(--text-strong);">nhiều thời gian và công sức nhất</strong>.</p>
+      <div class="highlight-box">Input trash → Output trash.</div>
+    </div>
+
+    <div class="question">
+      Vậy khi planning, cần thực hiện những gì để có được <span class="accent">kết quả tốt nhất?</span>
+    </div>
+
+    <!-- Illustration: funnel/bottleneck -->
+    <div class="illu" style="bottom: 8vh; right: 6vw; width: 200px; height: 200px;">
+      <svg viewBox="0 0 200 200">
+        <path d="M30 30 L170 30 L120 100 L120 170 L80 170 L80 100 Z"/>
+        <line x1="30" y1="30" x2="170" y2="30" stroke-width="3"/>
+        <circle cx="60"  cy="55" r="3" class="fill"/>
+        <circle cx="100" cy="50" r="3" class="fill"/>
+        <circle cx="140" cy="55" r="3" class="fill"/>
+        <circle cx="80"  cy="70" r="2" class="fill"/>
+        <circle cx="120" cy="70" r="2" class="fill"/>
+        <line x1="100" y1="130" x2="100" y2="155" stroke-width="2" class="accent-orange"/>
+        <path d="M93 148 L100 158 L107 148" class="accent-orange"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ────────── SLIDE 5a: Architect analogy — interactive setup ────────── -->
+  <section class="slide interact" data-slide="5">
+    <div class="eyebrow">// INTERACT <span class="timer-badge">2 min</span></div>
+    <h1 class="title">Imagine — bạn đang thuê <span class="accent-orange" style="color: var(--orange);">kiến trúc sư</span></h1>
+
+    <!-- Illustration: house blueprint -->
+    <div class="illu" style="top: 5vh; right: 4vw; width: 150px; height: 150px; opacity: 0.6;">
+      <svg viewBox="0 0 200 200">
+        <path d="M20 90 L100 30 L180 90"/>
+        <rect x="35" y="90" width="130" height="90"/>
+        <rect x="55" y="115" width="30" height="30" class="dim"/>
+        <rect x="115" y="115" width="30" height="40" class="dim"/>
+        <line x1="85" y1="180" x2="115" y2="180" stroke-width="3" class="accent-orange"/>
+        <line x1="20" y1="90" x2="180" y2="90" class="dim" stroke-dasharray="3 3"/>
+        <circle cx="100" cy="60" r="3" class="fill"/>
+      </svg>
+    </div>
+
+    <div class="action-box">
+      <p style="font-size: 1.2rem; color: var(--text); line-height: 1.6; margin-bottom: 1.5vh;">Bạn đang thuê 1 kiến trúc sư thiết kế nội thất cho nhà mình.</p>
+
+      <p style="font-size: 1.4rem; line-height: 1.5; color: var(--text-strong); font-family: 'Space Grotesk', sans-serif; font-weight: 600; margin-bottom: 1vh;">
+        <span style="color: var(--orange);">Vai trò của bạn</span> trong quá trình này là gì?
+      </p>
+      <p style="font-size: 1.05rem; color: var(--muted); line-height: 1.5;">Bạn quyết định gì? Kiến trúc sư quyết định gì?</p>
+    </div>
+  </section>
+
+  <!-- ────────── SLIDE 5b: Architect analogy — reveal 2 paths ────────── -->
+  <section class="slide" data-slide="6">
+    <div class="eyebrow">// REVEAL</div>
+    <h1 class="title">2 cách thuê — <span class="accent">2 kết quả</span></h1>
+
+    <div class="compare">
+      <div class="col bad">
+        <div class="label">✕ Cách 1 — Chỉ đạo chi tiết</div>
+        <div class="quote">"Tường sơn màu xanh, sofa đặt góc trái, bàn ăn hình tròn 4 chỗ, đèn chùm phòng khách..."</div>
+        <div class="note" style="color: var(--red);">KTS chỉ làm 1 việc duy nhất — bố trí theo lệnh.<br><strong>Kết quả: không gian chắp vá, thiếu hài hòa.</strong></div>
+      </div>
+      <div class="col good">
+        <div class="label">✓ Cách 2 — Để KTS propose</div>
+        <div class="quote">"Nhà 4 người, 2 bé nhỏ. Thích phong cách Scandinavian, ngân sách X. Hãy đề xuất 2-3 hướng layout."</div>
+        <div class="note" style="color: var(--green-bright);">KTS dùng chuyên môn để propose, bạn feedback chi tiết.<br><strong>Kết quả: không gian hài hòa, đúng công năng, vừa ý bạn.</strong></div>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      Vai trò của bạn = <strong>người quyết định hướng &amp; reviewer</strong>, không phải dictator.
+    </div>
+  </section>
+
+  <!-- ────────── SLIDE 6 ────────── -->
+  <section class="slide" data-slide="6">
+    <div class="eyebrow">// TƯƠNG TỰ</div>
+    <h1 class="title">Planning với <span class="accent">Claude</span> cũng vậy</h1>
+
+    <!-- Illustration: AI brain / circuit -->
+    <div class="illu pulse" style="top: 5vh; right: 4vw; width: 150px; height: 150px; opacity: 0.7;">
+      <svg viewBox="0 0 200 200">
+        <path d="M100 30 C 60 30, 40 60, 50 100 C 30 120, 40 160, 80 165 C 100 180, 140 175, 150 150 C 175 140, 175 100, 155 90 C 165 60, 140 30, 100 30 Z"/>
+        <line x1="70" y1="80" x2="130" y2="80" class="dim"/>
+        <line x1="60" y1="110" x2="140" y2="110" class="dim"/>
+        <line x1="75" y1="140" x2="125" y2="140" class="dim"/>
+        <circle cx="70" cy="80" r="3" class="fill"/>
+        <circle cx="130" cy="80" r="3" class="fill"/>
+        <circle cx="100" cy="110" r="4" class="fill"/>
+        <circle cx="60" cy="110" r="3" class="fill"/>
+        <circle cx="140" cy="110" r="3" class="fill"/>
+        <circle cx="75" cy="140" r="3" class="fill"/>
+        <circle cx="125" cy="140" r="3" class="fill"/>
+      </svg>
+    </div>
+
+    <div class="content-box">
+      <ol class="num-list">
+        <li><strong style="color: var(--text-strong);">Đừng chỉ rõ Claude code tính năng đó như thế nào.</strong> Hãy đưa ý tưởng, mong muốn, mục tiêu. Claude sẽ phác thảo, liệt kê kế hoạch, đề xuất hướng tiếp cận, tính năng và các bước thực hiện. Bạn feedback, chỉnh sửa, đi vào chi tiết từng phần.</li>
+        <li><strong style="color: var(--text-strong);">Bản chất:</strong> Claude có hiểu biết rộng hơn bạn về code — đã đọc hàng triệu tài liệu, nắm rõ best practices và quy trình.</li>
+      </ol>
+    </div>
+
+    <div class="info-box">
+      <span class="info-label">Vai trò của bạn:</span> Reviewer & domain expert — không phải dictator.
+    </div>
+  </section>
+
+  <!-- ────────── SLIDE 7 (NEW-A): Structured workflow framework ────────── -->
+  <section class="slide" data-slide="9">
+    <div class="eyebrow">// FRAMEWORK</div>
+    <h1 class="title">Cấu trúc lại — <span class="accent">structured workflow</span></h1>
+
+    <p class="lead" style="margin-bottom: 0.5vh;">Vừa rồi là mindset. Bây giờ là cấu trúc — 6 bước mỗi feature sẽ đi qua.</p>
+
+    <div class="workflow">
+      <div class="step"><div class="num">01</div><div class="name">Brainstorm</div></div>
+      <div class="arrow">›</div>
+      <div class="step"><div class="num">02</div><div class="name">Plan</div></div>
+      <div class="arrow">›</div>
+      <div class="step"><div class="num">03</div><div class="name">User Stories</div></div>
+      <div class="arrow">›</div>
+      <div class="step"><div class="num">04</div><div class="name">Classify</div></div>
+      <div class="arrow">›</div>
+      <div class="step"><div class="num">05</div><div class="name">Execute</div></div>
+      <div class="arrow">›</div>
+      <div class="step"><div class="num">06</div><div class="name">Verify</div></div>
+    </div>
+    <div class="workflow-loop">Feedback loop — review &amp; iterate ở mọi bước, không chỉ cuối.</div>
+
+    <div class="info-box">
+      <span class="info-label">Phạm vi buổi này:</span> Tập trung vào <strong>Planning phase</strong> (bước 01 – 04). Execute &amp; Verify sẽ deep-dive buổi tiếp theo.
+    </div>
+  </section>
+
+  <!-- ────────── SLIDE 8 ────────── -->
+  <section class="slide" data-slide="8">
+    <div class="eyebrow">// INPUT</div>
+    <h1 class="title">Cần cung cấp <span class="accent">thông tin gì</span> cho Claude?</h1>
+
+    <!-- Illustration: filter / funnel -->
+    <div class="illu" style="top: 5vh; right: 4vw; width: 140px; height: 140px; opacity: 0.6;">
+      <svg viewBox="0 0 200 200">
+        <path d="M20 30 L180 30 L130 100 L130 165 L70 180 L70 100 Z"/>
+        <line x1="20" y1="30" x2="180" y2="30" stroke-width="3"/>
+        <text x="100" y="60" text-anchor="middle" font-family="JetBrains Mono" font-size="14" font-weight="700" fill="currentColor" style="fill: var(--green); stroke: none;">BIZ</text>
+        <line x1="85" y1="140" x2="115" y2="140" class="accent-orange"/>
+      </svg>
+    </div>
+
+    <ol class="num-list">
+      <li><strong style="color: var(--text-strong);">Những thông tin Claude không tự suy luận được</strong> — đặc thù của ngành, của sản phẩm, business context. <em>Không đi sâu vào kỹ thuật.</em></li>
+      <li>Claude đã có sẵn: <strong style="color: var(--text-strong);">best practices, design patterns, UX phổ biến</strong> trên thị trường.</li>
+    </ol>
+
+    <div class="warn-box">
+      <span class="warn-label">Lãng phí token:</span> Đưa mô tả UX chi tiết cho Claude khi đó là patterns phổ thông.
+    </div>
+
+    <div class="info-box">
+      <span class="info-label">Tip:</span> Trước khi viết prompt, hỏi: <strong>"Cái mình định prompt có phải ai cũng biết không?"</strong> — Nếu không → đưa vào prompt. Nếu có → Claude đã biết.
+    </div>
+
+    <div class="highlight-box">
+      → Prompt ban đầu chỉ cần <strong>business logic</strong>, không cần UX.
+    </div>
+  </section>
+
+  <!-- ────────── NEW-B: Anti-patterns ────────── -->
+  <!-- ────────── INTERACT: Business vs UX exercise ────────── -->
+  <section class="slide interact" data-slide="9">
+    <div class="eyebrow">// INTERACT <span class="timer-badge">3 min</span></div>
+    <h1 class="title">Quick exercise — <span class="accent-orange" style="color: var(--orange);">Business hay UX?</span></h1>
+
+    <p style="font-size: 1rem; color: var(--muted); margin-top: 0.3vh;">Trong các câu sau, đâu là <strong style="color: var(--blue);">business logic</strong> (cần đưa vào prompt) và đâu là <strong style="color: var(--purple);">UX detail</strong> (không cần)?</p>
+
+    <div class="bux-list">
+      <div class="bux-row" data-reveal-row>
+        <span class="bux-num">01</span>
+        <div class="bux-q">"Voucher chỉ áp dụng cho đơn ≥ 500K"</div>
+        <div class="bux-opts">
+          <span class="bux-opt biz correct">BUSINESS</span>
+          <span class="bux-opt ux">UX</span>
+        </div>
+      </div>
+      <div class="bux-row" data-reveal-row>
+        <span class="bux-num">02</span>
+        <div class="bux-q">"Button 'Apply' đổi màu xanh khi hover"</div>
+        <div class="bux-opts">
+          <span class="bux-opt biz">BUSINESS</span>
+          <span class="bux-opt ux correct">UX</span>
+        </div>
+      </div>
+      <div class="bux-row" data-reveal-row>
+        <span class="bux-num">03</span>
+        <div class="bux-q">"Khách phải đăng nhập trước khi sử dụng voucher"</div>
+        <div class="bux-opts">
+          <span class="bux-opt biz correct">BUSINESS</span>
+          <span class="bux-opt ux">UX</span>
+        </div>
+      </div>
+      <div class="bux-row" data-reveal-row>
+        <span class="bux-num">04</span>
+        <div class="bux-q">"Hiển thị animation confetti khi áp voucher thành công"</div>
+        <div class="bux-opts">
+          <span class="bux-opt biz">BUSINESS</span>
+          <span class="bux-opt ux correct">UX</span>
+        </div>
+      </div>
+      <div class="bux-row" data-reveal-row>
+        <span class="bux-num">05</span>
+        <div class="bux-q">"Mỗi voucher có giới hạn 100 lượt sử dụng"</div>
+        <div class="bux-opts">
+          <span class="bux-opt biz correct">BUSINESS</span>
+          <span class="bux-opt ux">UX</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-slide="10">
+    <div class="eyebrow">// ANTI-PATTERNS</div>
+    <h1 class="title">Những lỗi <span class="accent" style="color: var(--red);">cần tránh</span></h1>
+
+    <div class="content-box" style="border-left-color: var(--red); background: linear-gradient(180deg, rgba(248,113,113,0.06), rgba(248,113,113,0.02)); box-shadow: 0 0 40px rgba(248,113,113,0.12);">
+      <ol class="anti-list">
+        <li>Cho Claude code khi plan <strong style="color: var(--text-strong);">chưa được approve</strong></li>
+        <li>Đưa UX/UI chi tiết khi không cần — <em>lãng phí token, đóng khung suy nghĩ Claude</em></li>
+        <li>Plan dài quá 1 màn hình → context window bị nhiễu, Claude hiểu sai</li>
+        <li>Skip review user stories vì "thấy ok rồi" → bỏ sót edge cases</li>
+        <li>1 prompt khổng lồ chứa nhiều task không liên quan</li>
+        <li>Không có acceptance criteria → không biết khi nào "xong"</li>
+      </ol>
+    </div>
+
+    <div class="info-box">
+      <span class="info-label">Quy tắc chung:</span> Nếu thấy Claude làm sai hướng, dừng lại — <strong>vấn đề thường ở prompt, không phải Claude</strong>.
+    </div>
+  </section>
+
+  <!-- ────────── NEW-C: Prompt tệ vs tốt ────────── -->
+  <!-- ────────── INTERACT #4: Self-audit ────────── -->
+  <section class="slide interact" data-slide="11">
+    <div class="eyebrow">// INTERACT <span class="timer-badge">5 min</span></div>
+    <h1 class="title">Audit <span class="accent-orange" style="color: var(--orange);">prompt của chính bạn</span></h1>
+
+    <div class="action-box">
+      <div class="action-item"><span class="action-num">1</span><div class="text">Mở <strong style="color: var(--text-strong);">Claude Code</strong> lên.</div></div>
+      <div class="action-item"><span class="action-num">2</span><div class="text">Scroll lại <strong style="color: var(--text-strong);">1 conversation tuần trước</strong> — task bất kỳ.</div></div>
+      <div class="action-item"><span class="action-num">3</span><div class="text">Check: prompt đó có dính <strong style="color: var(--red);">anti-pattern nào</strong> trong 6 cái vừa rồi không?</div></div>
+    </div>
+
+  </section>
+
+  <section class="slide" data-slide="12">
+    <div class="eyebrow">// EXAMPLE</div>
+    <h1 class="title">Cùng 1 feature — <span class="accent">2 cách prompt</span></h1>
+
+    <div class="compare">
+      <div class="col bad">
+        <div class="label">✕ Prompt tệ</div>
+        <div class="quote">"Tạo trang checkout có form thanh toán, button màu xanh, dùng React, integrate Stripe, validate email với regex"</div>
+        <div class="note">Chỉ định kỹ thuật + UX + stack. Claude làm theo lệnh, không suy nghĩ. Bị đóng khung từ đầu.</div>
+      </div>
+      <div class="col good">
+        <div class="label">✓ Prompt tốt</div>
+        <div class="quote">"Cần luồng checkout cho e-commerce. <strong style="color: var(--green-bright);">Business:</strong> support cả guest + logged-in. Thanh toán qua VNPay &amp; MoMo. Giỏ có thể áp voucher (module đã sẵn). <strong style="color: var(--green-bright);">Brainstorm 2-3 hướng tiếp cận trước.</strong>"</div>
+        <div class="note">Đưa business context + mục tiêu. Mời Claude propose. Bạn review, chọn hướng, đi sâu.</div>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      Sự khác biệt: <strong>WHAT</strong> + <strong>WHY</strong> thay vì <strong>HOW</strong>.
+    </div>
+  </section>
+
+  <!-- ────────── SLIDE 8 ────────── -->
+  <!-- ────────── INTERACT #5: Live demo bad vs good prompt ────────── -->
+  <section class="slide interact" data-slide="13">
+    <div class="eyebrow">// LIVE DEMO <span class="timer-badge">8 min</span></div>
+    <h1 class="title">Chạy <span class="accent-orange" style="color: var(--orange);">2 prompt thật</span> — so sánh output</h1>
+
+    <div class="action-box">
+      <div class="action-item"><span class="action-num">1</span><div class="text"><strong style="color: var(--red);">Chạy prompt tệ</strong> — quan sát: Claude có hỏi gì không? Output bao nhiêu dòng? Mất bao lâu?</div></div>
+      <div class="action-item"><span class="action-num">2</span><div class="text"><strong style="color: var(--green-bright);">Chạy prompt tốt</strong> — quan sát: Claude propose mấy hướng? Có hỏi lại không? Output thế nào?</div></div>
+      <div class="action-item"><span class="action-num">3</span><div class="text"><strong style="color: var(--text-strong);">Compare:</strong> Sự khác biệt nằm ở đâu?</div></div>
+    </div>
+
+  </section>
+
+  <section class="slide" data-slide="14">
+    <div class="eyebrow">// REVIEW</div>
+    <h1 class="title">Yêu cầu Claude viết <span class="accent">user stories</span> từ plan</h1>
+
+    <!-- Illustration: user personas -->
+    <div class="illu" style="top: 5vh; right: 4vw; width: 160px; height: 140px; opacity: 0.6;">
+      <svg viewBox="0 0 220 180">
+        <!-- person 1 -->
+        <circle cx="50" cy="60" r="20"/>
+        <path d="M20 130 C20 100, 80 100, 80 130 L80 160 L20 160 Z"/>
+        <!-- person 2 (center, larger) -->
+        <circle cx="110" cy="55" r="24"/>
+        <path d="M75 140 C75 105, 145 105, 145 140 L145 170 L75 170 Z"/>
+        <!-- person 3 -->
+        <circle cx="170" cy="60" r="20"/>
+        <path d="M140 130 C140 100, 200 100, 200 130 L200 160 L140 160 Z"/>
+        <!-- speech indicator -->
+        <circle cx="110" cy="20" r="6" class="fill"/>
+      </svg>
+    </div>
+
+    <div class="content-box">
+      <ol class="num-list">
+        <li>Review plan bằng user stories → bạn đóng vai <strong style="color: var(--text-strong);">người dùng</strong>, dễ phát hiện trường hợp bị bỏ sót.</li>
+        <li><strong style="color: var(--text-strong);">Review bằng tư duy phản biện:</strong>
+          <ul>
+            <li>Đọc từng user story, tưởng tượng mình là user — mình sẽ làm gì tiếp?</li>
+            <li>Có trường hợp nào bị sót không?</li>
+            <li>Luôn hỏi <em>"Nếu... thì sao?"</em> để tìm edge cases và xung đột.</li>
+          </ul>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ────────── NEW-E: Acceptance criteria ────────── -->
+  <section class="slide" data-slide="12">
+    <div class="eyebrow">// AC</div>
+    <h1 class="title">Mỗi user story cần <span class="accent">acceptance criteria</span></h1>
+
+    <div class="content-box">
+      <p class="lead"><strong style="color: var(--text-strong);">User story</strong> = WHAT + WHO + WHY.<br>
+      <strong style="color: var(--text-strong);">Acceptance criteria</strong> = làm sao biết là "xong" — contract giữa bạn và Claude.</p>
+
+      <div class="section-label">Format Given-When-Then:</div>
+      <div class="gwt">
+        <div><span class="kw">GIVEN</span> user đã login &amp; có sản phẩm trong giỏ</div>
+        <div><span class="kw">WHEN</span> apply mã voucher "SALE10"</div>
+        <div><span class="kw">THEN</span> discount hiện trên tổng tiền, voucher counter giảm đi 1</div>
+        <div><span class="kw">AND</span> nếu voucher hết lượt → báo lỗi "Mã đã hết hạn"</div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <span class="info-label">Không có AC:</span> Bạn và Claude sẽ hiểu khác nhau về "đã xong". <strong>AC = contract</strong>, không có nó thì verify cũng vô nghĩa.
+    </div>
+  </section>
+
+  <!-- ────────── SLIDE 9 ────────── -->
+  <section class="slide" data-slide="13">
+    <div class="eyebrow">// CONTEXT WINDOW</div>
+    <h1 class="title">Khi plan quá dài <span class="accent-orange">→ Claude dễ hiểu sai</span></h1>
+
+    <!-- Illustration: 3 categorized boxes -->
+    <div class="illu" style="top: 5vh; right: 4vw; width: 180px; height: 140px; opacity: 0.65;">
+      <svg viewBox="0 0 240 180">
+        <rect x="10" y="40" width="60" height="100" rx="4"/>
+        <rect x="90" y="40" width="60" height="100" rx="4" class="accent-orange"/>
+        <rect x="170" y="40" width="60" height="100" rx="4" class="accent-blue"/>
+        <line x1="20" y1="60" x2="60" y2="60"/>
+        <line x1="20" y1="80" x2="55" y2="80"/>
+        <line x1="20" y1="100" x2="60" y2="100"/>
+        <line x1="100" y1="60" x2="140" y2="60" class="accent-orange"/>
+        <line x1="100" y1="80" x2="135" y2="80" class="accent-orange"/>
+        <line x1="180" y1="60" x2="220" y2="60" class="accent-blue"/>
+        <line x1="180" y1="80" x2="215" y2="80" class="accent-blue"/>
+        <line x1="180" y1="100" x2="220" y2="100" class="accent-blue"/>
+        <text x="40"  y="30" text-anchor="middle" font-family="JetBrains Mono" font-size="14" font-weight="700" style="fill: var(--green); stroke: none;">01</text>
+        <text x="120" y="30" text-anchor="middle" font-family="JetBrains Mono" font-size="14" font-weight="700" style="fill: var(--orange); stroke: none;">02</text>
+        <text x="200" y="30" text-anchor="middle" font-family="JetBrains Mono" font-size="14" font-weight="700" style="fill: var(--blue); stroke: none;">03</text>
+      </svg>
+    </div>
+
+    <div class="warn-box">
+      <span class="warn-label">Vấn đề:</span> Plan dài → Context Window phình to → Claude mất focus, hiểu sai requirement.
+    </div>
+
+    <div class="content-box">
+      <div class="section-label">Yêu cầu Claude phân loại tasks thành 3 nhóm:</div>
+      <ol class="num-list">
+        <li><strong style="color: var(--text-strong);">Có thể implement ngay</strong> — task rõ ràng, đủ context → đi vào execute luôn.</li>
+        <li><strong style="color: var(--text-strong);">Phức tạp, cần plan thêm</strong> — Claude ghi vào <code style="color: var(--green); background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">complex-cases.md</code>: edge cases &amp; decisions cần làm rõ trước khi code.</li>
+        <li><strong style="color: var(--text-strong);">Cần discuss với team khác</strong> — Claude ghi <code style="color: var(--green); background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">questions.md</code>: câu hỏi gì, ai trả lời, context để họ hiểu.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ────────── SLIDE 14 (was Rules slide 11): Bridge + Rules ────────── -->
+  <!-- ────────── INTERACT #6: Mini-quiz classify ────────── -->
+  <section class="slide interact" data-slide="16">
+    <div class="eyebrow">// INTERACT <span class="timer-badge">5 min</span></div>
+    <h1 class="title">Quick quiz — <span class="accent-orange" style="color: var(--orange);">phân loại 5 tasks</span></h1>
+
+    <p style="font-size: 1rem; color: var(--muted); margin-top: 0.5vh;">Vote nhanh từng task: <strong style="color: var(--green);">NOW</strong> · <strong style="color: var(--orange);">COMPLEX</strong> · <strong style="color: var(--blue);">DISCUSS</strong></p>
+
+    <div class="quiz-cards">
+      <div class="quiz-card">
+        <div class="qnum">TASK 01</div>
+        Thêm field "phone number" vào form login
+        <div class="qans" data-reveal>→ NOW (rõ ràng, đủ context)</div>
+      </div>
+      <div class="quiz-card">
+        <div class="qnum">TASK 02</div>
+        Implement refund flow cho payment đã qua 30 ngày
+        <div class="qans" data-reveal>→ DISCUSS (cần policy team)</div>
+      </div>
+      <div class="quiz-card">
+        <div class="qnum">TASK 03</div>
+        Build email template cho order confirmation
+        <div class="qans" data-reveal>→ COMPLEX (i18n + branding)</div>
+      </div>
+      <div class="quiz-card">
+        <div class="qnum">TASK 04</div>
+        Đổi màu button checkout từ xanh sang cam
+        <div class="qans" data-reveal>→ NOW</div>
+      </div>
+      <div class="quiz-card">
+        <div class="qnum">TASK 05</div>
+        Tích hợp với hệ thống loyalty point
+        <div class="qans" data-reveal>→ DISCUSS (cần data từ loyalty team)</div>
+      </div>
+    </div>
+
+  </section>
+
+  <section class="slide" data-slide="17">
+    <div class="eyebrow">// CHECKPOINT</div>
+    <h1 class="title">Trước khi practice — <span class="accent">6 rule</span> bắt buộc</h1>
+
+    <p class="lead" style="margin-bottom: 0.5vh;">Vừa đi qua mindset, framework, input &amp; output. Bây giờ là <strong style="color: var(--text-strong);">luật chơi</strong> trước khi vào tools &amp; thực hành.</p>
+
+    <!-- Illustration: shield / lock -->
+    <div class="illu" style="top: 5vh; right: 4vw; width: 130px; height: 140px; opacity: 0.7;">
+      <svg viewBox="0 0 160 180">
+        <path d="M80 10 L140 35 L140 90 C140 130, 110 160, 80 170 C50 160, 20 130, 20 90 L20 35 Z"/>
+        <rect x="55" y="75" width="50" height="50" rx="4"/>
+        <path d="M65 75 L65 60 C65 50, 95 50, 95 60 L95 75" class="dim"/>
+        <circle cx="80" cy="100" r="5" class="fill"/>
+      </svg>
+    </div>
+
+    <div class="content-box">
+      <div class="section-label">6 rule bắt buộc khi plan:</div>
+      <ol class="num-list">
+        <li><strong style="color: var(--text-strong);">KHÔNG tự động code</strong> cho đến khi design được approve.</li>
+        <li><strong style="color: var(--text-strong);">Luôn dùng plan mode</strong> trong giai đoạn này.</li>
+        <li>Mỗi user story phải có <strong style="color: var(--text-strong);">acceptance criteria</strong>.</li>
+        <li>Claude phải <strong style="color: var(--text-strong);">dừng và hỏi</strong> khi không chắc, không được đoán.</li>
+        <li>Plan phải được <strong style="color: var(--text-strong);">save ra file <code style="color: var(--green); background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">plan.md</code></strong> — không chỉ tồn tại trong chat.</li>
+        <li><strong style="color: var(--text-strong);">Không skip plan</strong> dù task nhỏ — kỷ luật &gt; tốc độ ngắn hạn.</li>
+      </ol>
+    </div>
+
+    <div class="highlight-box">
+      Design first → Approve → Code. Không bao giờ đảo ngược.
+    </div>
+  </section>
+
+  <!-- ────────── SLIDE 12 ────────── -->
+  <section class="slide" data-slide="16">
+    <div class="eyebrow">// TOOL</div>
+    <h1 class="title">Brainstorm qua plugin <span class="accent">superpowers</span></h1>
+    <div class="step-chip"><span class="ico">↗</span> Hỗ trợ <span class="num">01</span> Brainstorm</div>
+
+    <!-- Illustration: lightbulb with rays -->
+    <div class="illu pulse" style="top: 5vh; right: 4vw; width: 130px; height: 140px; opacity: 0.6;">
+      <svg viewBox="0 0 160 180">
+        <path d="M80 30 C 50 30, 35 55, 50 85 C 55 95, 60 100, 60 115 L100 115 C 100 100, 105 95, 110 85 C 125 55, 110 30, 80 30 Z"/>
+        <line x1="60" y1="125" x2="100" y2="125"/>
+        <line x1="65" y1="135" x2="95" y2="135"/>
+        <line x1="70" y1="145" x2="90" y2="145"/>
+        <line x1="80" y1="10" x2="80" y2="20" class="accent-orange"/>
+        <line x1="30" y1="60" x2="40" y2="65" class="accent-orange"/>
+        <line x1="130" y1="60" x2="120" y2="65" class="accent-orange"/>
+        <line x1="20" y1="30" x2="32" y2="38" class="accent-orange"/>
+        <line x1="140" y1="30" x2="128" y2="38" class="accent-orange"/>
+      </svg>
+    </div>
+
+    <p class="lead" style="margin-bottom: 0.5vh;"><strong style="color: var(--text-strong);">Superpowers</strong> là plugin Claude Code cung cấp brainstorm framework có cấu trúc.</p>
+
+    <div class="install-label">Cài đặt qua Claude plugin:</div>
+    <div class="cmd slash"><span class="arg">/plugin</span> install superpowers</div>
+
+    <div class="content-box" style="padding: 1.8vh 2.5vw; margin-top: 1.5vh;">
+      <div class="section-label" style="font-size: 1.05rem; margin-bottom: 1vh;">Flow sử dụng:</div>
+      <ol class="num-list" style="font-size: 1rem;">
+        <li>Claude đưa câu hỏi phân tích <strong style="color: var(--text-strong);">idea &amp; mục tiêu</strong></li>
+        <li>Đề xuất <strong style="color: var(--text-strong);">2 – 3 hướng tiếp cận</strong></li>
+        <li>Bạn chọn hướng → đi sâu chi tiết, hỏi lại nếu chưa rõ</li>
+        <li>Claude viết lại thành <strong style="color: var(--text-strong);">plan + user stories</strong></li>
+        <li>Review từng story bằng <strong style="color: var(--text-strong);">tư duy phản biện</strong> tìm edge cases</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ────────── SLIDE 13 ────────── -->
+  <section class="slide" data-slide="13">
+    <div class="eyebrow">// TOOL</div>
+    <h1 class="title">Plan trên <span class="accent">codebase</span> có sẵn</h1>
+    <div class="step-chip"><span class="ico">↗</span> Hỗ trợ <span class="num">02</span> Plan — gather context</div>
+
+    <!-- Illustration: feature graph / network -->
+    <div class="illu" style="top: 5vh; right: 4vw; width: 180px; height: 150px; opacity: 0.65;">
+      <svg viewBox="0 0 220 180">
+        <circle cx="110" cy="90" r="14" class="accent-orange"/>
+        <circle cx="40"  cy="40"  r="10"/>
+        <circle cx="180" cy="40"  r="10"/>
+        <circle cx="40"  cy="140" r="10"/>
+        <circle cx="180" cy="140" r="10"/>
+        <circle cx="110" cy="20"  r="8" class="dim"/>
+        <circle cx="110" cy="160" r="8" class="dim"/>
+        <line x1="110" y1="90" x2="40"  y2="40"/>
+        <line x1="110" y1="90" x2="180" y2="40"/>
+        <line x1="110" y1="90" x2="40"  y2="140"/>
+        <line x1="110" y1="90" x2="180" y2="140"/>
+        <line x1="110" y1="90" x2="110" y2="20" class="dim"/>
+        <line x1="110" y1="90" x2="110" y2="160" class="dim"/>
+        <line x1="40" y1="40" x2="180" y2="40" class="dim" stroke-dasharray="2 3"/>
+        <line x1="40" y1="140" x2="180" y2="140" class="dim" stroke-dasharray="2 3"/>
+      </svg>
+    </div>
+
+    <div class="content-box">
+      <ol class="num-list">
+        <li>Yêu cầu Claude <strong style="color: var(--text-strong);">check lại toàn bộ feature có thể bị ảnh hưởng</strong> bởi tính năng đang plan → tránh xung đột &amp; bug tiềm ẩn.</li>
+        <li>Dùng <strong style="color: var(--text-strong);">codegraph</strong> để build knowledge graph của codebase. Claude truy vấn graph thay vì scan từng file → <em>fewer tokens, fewer tool calls</em>.</li>
+      </ol>
+
+      <div class="install-label">Cài đặt codegraph (1 lệnh):</div>
+      <div class="cmd">npx <span class="arg">@colbymchenry/codegraph</span></div>
+
+      <div style="margin-top: 1vh; font-size: 0.92rem; color: var(--muted);">
+        Sau đó <code style="color: var(--green); background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">cd</code> vào project &amp; chạy <code style="color: var(--green); background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">codegraph init -i</code> để index.
+        Repo: <a class="ext-link" href="https://github.com/colbymchenry/codegraph" target="_blank">github.com/colbymchenry/codegraph</a>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <span class="info-label">Mục đích:</span> Đảm bảo Claude có đủ bối cảnh trước khi thay đổi gì — không "fix một chỗ, vỡ ba chỗ".
+    </div>
+  </section>
+
+  <!-- ────────── SLIDE: Map feature skill ────────── -->
+  <section class="slide" data-slide="18">
+    <div class="eyebrow">// SKILL</div>
+    <h1 class="title">Map feature — <span class="accent">bản đồ dự án</span></h1>
+    <div class="step-chip"><span class="ico">↗</span> Hỗ trợ <span class="num">02</span> Plan — feature dependency context</div>
+
+    <!-- Illustration: feature map nodes -->
+    <div class="illu" style="top: 5vh; right: 4vw; width: 170px; height: 140px; opacity: 0.6;">
+      <svg viewBox="0 0 220 180">
+        <rect x="20" y="20" width="50" height="32" rx="4"/>
+        <rect x="90" y="20" width="50" height="32" rx="4" class="accent-orange"/>
+        <rect x="160" y="20" width="40" height="32" rx="4"/>
+        <rect x="50" y="80" width="50" height="32" rx="4" class="accent-blue"/>
+        <rect x="120" y="80" width="60" height="32" rx="4" class="accent-orange"/>
+        <rect x="80" y="140" width="60" height="30" rx="4"/>
+        <line x1="45" y1="52" x2="75" y2="80" class="dim"/>
+        <line x1="115" y1="52" x2="115" y2="80" class="dim"/>
+        <line x1="115" y1="52" x2="150" y2="80" class="dim"/>
+        <line x1="180" y1="52" x2="150" y2="80" class="dim"/>
+        <line x1="75" y1="112" x2="100" y2="140" class="dim"/>
+        <line x1="150" y1="112" x2="120" y2="140" class="dim"/>
+      </svg>
+    </div>
+
+    <div class="content-box">
+      <div class="section-label" style="font-size: 1.05rem;">Khi nào nên chạy:</div>
+      <ol class="num-list">
+        <li><strong style="color: var(--text-strong);">Dự án đã launching</strong> → trước khi plan thêm feature mới.</li>
+        <li><strong style="color: var(--text-strong);">Dự án mới</strong> → sau khi hoàn thành full toàn bộ feature ban đầu.</li>
+      </ol>
+
+      <p style="font-size: 1.05rem; color: var(--text); margin-top: 1vh; line-height: 1.5;">
+        <strong style="color: var(--text-strong);">Output:</strong> file tổng thể thể hiện <strong style="color: var(--green-bright);">mối quan hệ phụ thuộc giữa các feature</strong> — không phải code-level mà là <em>feature/business level</em>.
+      </p>
+
+      <div class="install-label">Chạy skill trong Claude Code:</div>
+      <div class="cmd slash"><span class="arg">/map-feature</span></div>
+
+      <div style="margin-top: 1vh; font-size: 0.92rem; color: var(--muted);">
+        Repo: <a class="ext-link" href="https://gitlab.xipat.com/danhloc112/xipat-workflow" target="_blank">gitlab.xipat.com/danhloc112/xipat-workflow</a>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <span class="info-label">Vì sao quan trọng:</span> Khi improve hay create feature mới, có bản đồ → biết được tính năng nào sẽ bị ảnh hưởng, tránh phá vỡ logic hệ thống.
+    </div>
+
+    <div class="highlight-box">
+      Combo: <strong>codegraph</strong> (code/symbol level) + <strong>map-feature</strong> (feature/business level) = full context.
+    </div>
+  </section>
+
+  <!-- ────────── NEW-D: Delegation / subagents ────────── -->
+  <section class="slide" data-slide="19">
+    <div class="eyebrow">// TOOL</div>
+    <h1 class="title">Chia việc với <span class="accent">subagents</span></h1>
+    <div class="step-chip"><span class="ico">↗</span> Hỗ trợ <span class="num">04</span> Classify &amp; <span class="num">05</span> Execute</div>
+
+    <div class="content-box">
+      <ol class="num-list">
+        <li><strong style="color: var(--text-strong);">1 plan lớn ≠ 1 prompt khổng lồ.</strong> Chia thành các task độc lập, mỗi task có context riêng.</li>
+        <li><strong style="color: var(--text-strong);">Subagents</strong> = agent con xử lý task isolated → không "ô nhiễm" context window chính.</li>
+        <li><strong style="color: var(--text-strong);">Khi nào delegate:</strong>
+          <ul>
+            <li>Research độc lập — tổng hợp nhiều file thành 1 câu trả lời</li>
+            <li>Verify / test sau khi implement</li>
+            <li>Task song song không phụ thuộc nhau</li>
+          </ul>
+        </li>
+      </ol>
+
+      <div class="install-label">Spawn subagent trong Claude Code:</div>
+      <div class="cmd slash"><span class="arg">/fork</span> &lt;task description&gt;</div>
+      <div style="margin-top: 0.8vh; font-size: 0.92rem; color: var(--muted);">
+        Ví dụ: <code style="color: var(--green); background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">/fork research payment SDK options &amp; tradeoffs</code>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <span class="info-label">Tip:</span> Sau khi plan xong, hỏi Claude: <em>"Task nào trong plan này có thể <code style="color: var(--blue);">/fork</code>?"</em> — Claude sẽ tự nhận ra cấu trúc parallel.
+    </div>
+
+    <!-- Illustration: branching delegation -->
+    <div class="illu" style="top: 5vh; right: 4vw; width: 160px; height: 150px; opacity: 0.65;">
+      <svg viewBox="0 0 200 180">
+        <circle cx="100" cy="30" r="14" class="fill"/>
+        <circle cx="100" cy="30" r="14"/>
+        <line x1="100" y1="44" x2="40"  y2="100"/>
+        <line x1="100" y1="44" x2="100" y2="100"/>
+        <line x1="100" y1="44" x2="160" y2="100"/>
+        <circle cx="40"  cy="115" r="12"/>
+        <circle cx="100" cy="115" r="12" class="accent-orange"/>
+        <circle cx="160" cy="115" r="12" class="accent-blue"/>
+        <line x1="40"  y1="127" x2="40"  y2="155" class="dim"/>
+        <line x1="100" y1="127" x2="100" y2="155" class="dim accent-orange"/>
+        <line x1="160" y1="127" x2="160" y2="155" class="dim accent-blue"/>
+        <circle cx="40"  cy="165" r="4" class="fill"/>
+        <circle cx="100" cy="165" r="4" class="fill"/>
+        <circle cx="160" cy="165" r="4" class="fill"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ────────── SLIDE: Why English ────────── -->
+  <section class="slide" data-slide="19">
+    <div class="eyebrow">// BEST PRACTICE</div>
+    <h1 class="title">Vì sao <span class="accent">English</span> là ngôn ngữ tối ưu khi prompt?</h1>
+
+    <p style="font-size: 1.15rem; color: var(--muted); margin-top: 1vh; font-style: italic;">
+      Suy nghĩ 30 giây trước khi xem đáp án.
+    </p>
+
+    <div data-reveal>
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Factor</th>
+            <th class="col-en">✓ English</th>
+            <th class="col-other">Vietnamese / Other</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="factor">Training data density</td>
+            <td class="cell-en">~70–80% của hầu hết LLM pretraining corpora</td>
+            <td class="cell-other">&lt; 2% cho tiếng Việt; ngôn ngữ khác cũng thấp</td>
+          </tr>
+          <tr>
+            <td class="factor">Token efficiency</td>
+            <td class="cell-en">1 word ≈ <strong style="color: var(--green-bright);">1–1.5 tokens</strong></td>
+            <td class="cell-other">1 từ tiếng Việt ≈ 2–4 tokens (lãng phí)</td>
+          </tr>
+          <tr>
+            <td class="factor">Instruction following</td>
+            <td class="cell-en">Benchmark cao nhất trên tất cả models</td>
+            <td class="cell-other">Accuracy giảm với technical instructions</td>
+          </tr>
+          <tr>
+            <td class="factor">Code alignment</td>
+            <td class="cell-en">Code được viết bằng English → context khớp với code</td>
+            <td class="cell-other">Mismatch giữa ngôn ngữ context &amp; code</td>
+          </tr>
+          <tr>
+            <td class="factor">RLHF alignment</td>
+            <td class="cell-en">Phần lớn human feedback data là English</td>
+            <td class="cell-other">RLHF coverage sparse cho non-English</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="highlight-box" style="margin-top: 1.2vh;">
+        → Always English: <strong>prompts · plan files · user stories · code comments</strong>.
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────── SLIDE 14 ────────── -->
+  <section class="slide" data-slide="20">
+    <div class="eyebrow">// HANDS-ON</div>
+    <h1 class="title xl">Thực hành <span class="accent">→</span></h1>
+
+    <div class="info-box" style="margin-bottom: 1vh;">
+      <span class="info-label">Quay lại câu hỏi đầu buổi:</span> <em>"Planning cần làm gì để có kết quả tốt nhất?"</em> — Bây giờ bạn đã có đủ framework, rules &amp; tools. Tự làm <strong style="color: var(--green-bright);">1 plan thật</strong> ngay tại đây.
+    </div>
+
+    <p style="font-size: 1.05rem; color: var(--text); margin-bottom: 0.8vh;">
+      <strong style="color: var(--text-strong);">Chọn 1 trong 2:</strong>
+    </p>
+
+    <div class="group-grid">
+      <div class="group-card g-a">
+        <div class="gname">A · Mini project mới</div>
+        <div class="gtask">Ý tưởng cá nhân bạn muốn xây — side project, công cụ nhỏ, automation, app demo...</div>
+      </div>
+      <div class="group-card g-b">
+        <div class="gname">B · Feature trên sản phẩm có sẵn</div>
+        <div class="gtask">1 feature đang là pain hoặc cần làm trong dự án thật của bạn. <em>Nếu chọn B → chạy <code style="color: var(--green);">/map-feature</code> trước.</em></div>
+      </div>
+    </div>
+
+    <p style="font-size: 1.05rem; color: var(--text); margin-top: 1.2vh; margin-bottom: 0.5vh;">
+      <strong style="color: var(--text-strong);">Các bước:</strong>
+    </p>
+    <ol class="num-list" style="margin-bottom: 1vh;">
+      <li>Brainstorm với <code style="color: var(--green); background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">/plugin superpowers</code> → propose 2-3 hướng → pick 1.</li>
+      <li>Claude viết <strong style="color: var(--text-strong);">plan.md</strong> + <strong style="color: var(--text-strong);">user-stories.md</strong> (mỗi story có Given-When-Then).</li>
+      <li>Classify tasks thành 3 nhóm (now / complex / discuss) → output thêm <code style="color: var(--green); background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">complex-cases.md</code> &amp; <code style="color: var(--green); background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">questions.md</code>.</li>
+      <li>Identify ≥ 1 task có thể <code style="color: var(--purple); background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">/fork</code> cho subagent.</li>
+    </ol>
+
+    <div class="highlight-box" style="margin-top: 0.5vh;">
+      ⌘ ~ 30 phút tự làm
+    </div>
+
+    <div class="warn-box" style="margin-top: 1vh;">
+      <span class="warn-label">⚠ Note:</span> Toàn bộ <strong style="color: var(--text-strong);">chat &amp; các file generated</strong> (plan.md, user-stories.md, complex-cases.md, questions.md) phải dùng <strong style="color: var(--text-strong);">100% tiếng Anh</strong> — tránh mix Việt/Anh.
+    </div>
+
+    <!-- Illustration: rocket launch -->
+    <div class="illu pulse" style="bottom: 10vh; right: 8vw; width: 200px; height: 240px;">
+      <svg viewBox="0 0 160 200">
+        <path d="M80 10 C 60 30, 50 70, 50 120 L50 150 L110 150 L110 120 C 110 70, 100 30, 80 10 Z"/>
+        <circle cx="80" cy="70" r="10"/>
+        <circle cx="80" cy="70" r="4" class="fill"/>
+        <path d="M50 130 L30 160 L50 155 Z" class="accent-orange"/>
+        <path d="M110 130 L130 160 L110 155 Z" class="accent-orange"/>
+        <path d="M65 155 L60 185 L75 175 L80 195 L85 175 L100 185 L95 155 Z" class="accent-orange"/>
+        <line x1="70" y1="160" x2="68" y2="180" class="accent-orange"/>
+        <line x1="90" y1="160" x2="92" y2="180" class="accent-orange"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Footer (shared) -->
+  <div class="footer">
+    <div><span class="key">←</span><span class="key">→</span> điều hướng</div>
+    <div class="progress" id="progress" style="--progress: 7%;"></div>
+    <div>Buổi 02 &nbsp;&nbsp; <span id="counter">1 / 14</span></div>
+  </div>
+
+</div>
+
+<script>
+  (function () {
+    const root = document.documentElement;
+    const slides = document.querySelectorAll('.slide');
+    const total = slides.length;
+    const counter = document.getElementById('counter');
+    const progress = document.getElementById('progress');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const themeBtn = document.getElementById('themeToggle');
+
+    let idx = 0;
+
+    function nextHiddenReveal(slide) {
+      // Find first hidden reveal item in DOM order (either [data-reveal] or [data-reveal-row])
+      return slide.querySelector('[data-reveal]:not(.shown), [data-reveal-row]:not(.shown)');
+    }
+
+    function updateNextHint() {
+      const active = slides[idx];
+      const existing = active.querySelector('.next-hint');
+      const hasHidden = nextHiddenReveal(active);
+      if (hasHidden && !existing) {
+        const hint = document.createElement('div');
+        hint.className = 'next-hint';
+        hint.textContent = 'press → to reveal';
+        active.appendChild(hint);
+      } else if (!hasHidden && existing) {
+        existing.remove();
+      }
+    }
+
+    function render() {
+      slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+      counter.textContent = (idx + 1) + ' / ' + total;
+      progress.style.setProperty('--progress', ((idx + 1) / total * 100) + '%');
+      prevBtn.disabled = idx === 0;
+      nextBtn.disabled = idx === total - 1;
+      const active = slides[idx];
+      // Reset reveal items when entering a slide
+      active.querySelectorAll('[data-reveal].shown, [data-reveal-row].shown').forEach(el => el.classList.remove('shown'));
+      // Re-trigger stacked-bar animations when revisiting slides 2/3
+      active.querySelectorAll('.seg').forEach(el => {
+        el.style.animation = 'none';
+        el.offsetHeight;
+        el.style.animation = '';
+      });
+      updateNextHint();
+    }
+
+    function go(delta) {
+      if (delta > 0) {
+        // Try to reveal next hidden item before advancing
+        const active = slides[idx];
+        const nextItem = nextHiddenReveal(active);
+        if (nextItem) {
+          nextItem.classList.add('shown');
+          updateNextHint();
+          return;
+        }
+      }
+      const oldIdx = idx;
+      idx = Math.max(0, Math.min(total - 1, idx + delta));
+      if (idx !== oldIdx) render();
+    }
+
+    prevBtn.addEventListener('click', () => go(-1));
+    nextBtn.addEventListener('click', () => go(1));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { go(1); e.preventDefault(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { go(-1); e.preventDefault(); }
+      else if (e.key === 'Home') { idx = 0; render(); }
+      else if (e.key === 'End') { idx = total - 1; render(); }
+    });
+
+    // Theme toggle
+    const saved = localStorage.getItem('slide-theme');
+    if (saved === 'light' || saved === 'dark') root.setAttribute('data-theme', saved);
+    themeBtn.addEventListener('click', () => {
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('slide-theme', next); } catch (e) {}
+    });
+
+    render();
+  })();
+</script>
+
+</body>
+</html>
