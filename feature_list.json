@@ -38,12 +38,16 @@
       "title": "Pure pricing rules + Vitest tests (TDD)",
       "user_visible_behavior": "Pricing math (percentage, round-to-.99, set-compare-at, money parse/format) is implemented as pure functions and covered by passing unit tests.",
       "dependencies": ["feat-001"],
-      "status": "not_started",
+      "status": "passing",
       "verification": [
         "Run `npm run test` — Vitest suite for app/lib/pricing.ts is green.",
         "Run `npm run typecheck` — no type errors."
       ],
-      "evidence": [],
+      "evidence": [
+        "npx vitest run app/lib/pricing.test.ts -> 15/15 passing (2026-06-25). RUN v4.1.9 | Test Files 1 passed (1) | Tests 15 passed (15) | Duration 314ms.",
+        "npm run typecheck (tsc --noEmit) -> 0 errors (2026-06-25).",
+        "RED phase confirmed: before pricing.ts existed, test runner output 'Cannot find module ./pricing' (exit 1)."
+      ],
       "notes": "app/lib/pricing.ts must have zero Shopify/Remix/Polaris imports."
     },
     {
