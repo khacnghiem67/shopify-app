@@ -9,12 +9,17 @@ const MIN_PRICE = 0.01;
 
 export function parseMoney(value: string | null | undefined): number | null {
   if (value == null) return null;
+  // Shopify occasionally emits "" for a missing money field; Number("") === 0,
+  // so guard the empty/blank string explicitly and treat it as "no price".
+  if (value.trim() === "") return null;
   const n = Number(value);
   return Number.isFinite(n) ? n : null;
 }
 
 export function formatMoney(value: number): string {
-  // round half up to 2 decimals, avoiding float artifacts
+  // Round to 2 decimals. The + Number.EPSILON nudge fixes the common float
+  // artifact (e.g. 15.005 * 100 = 1500.4999...); it is an approximation, not a
+  // exact decimal rounding, which is acceptable for display/price math here.
   return (Math.round((value + Number.EPSILON) * 100) / 100).toFixed(2);
 }
 

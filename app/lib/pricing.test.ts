@@ -15,6 +15,9 @@ describe("parseMoney/formatMoney", () => {
   it("parses a money string", () => expect(parseMoney("15.99")).toBe(15.99));
   it("returns null for junk", () => expect(parseMoney("abc")).toBeNull());
   it("returns null for null", () => expect(parseMoney(null)).toBeNull());
+  it("returns null for undefined", () => expect(parseMoney(undefined)).toBeNull());
+  it("returns null for empty string (not 0)", () => expect(parseMoney("")).toBeNull());
+  it("returns null for blank string (not 0)", () => expect(parseMoney("   ")).toBeNull());
   it("formats to 2 decimals", () => expect(formatMoney(15.9)).toBe("15.90"));
   it("rounds half up to 2 decimals", () => expect(formatMoney(15.005)).toBe("15.01"));
 });
