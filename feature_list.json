@@ -1,6 +1,6 @@
 {
   "project": "bulkprice-shopify-app",
-  "last_updated": "2026-06-25",
+  "last_updated": "2026-06-26",
   "rules": {
     "single_active_feature": true,
     "passing_requires_evidence": true,
@@ -37,7 +37,9 @@
       "area": "pricing-core",
       "title": "Pure pricing rules + Vitest tests (TDD)",
       "user_visible_behavior": "Pricing math (percentage, round-to-.99, set-compare-at, money parse/format) is implemented as pure functions and covered by passing unit tests.",
-      "dependencies": ["feat-001"],
+      "dependencies": [
+        "feat-001"
+      ],
       "status": "passing",
       "verification": [
         "Run `npm run test` — Vitest suite for app/lib/pricing.ts is green.",
@@ -58,13 +60,18 @@
       "area": "data-read",
       "title": "Products loader (Admin GraphQL read)",
       "user_visible_behavior": "The app route loads products (title + first-variant price + compareAtPrice) from the store via the Admin GraphQL `products` query.",
-      "dependencies": ["feat-001"],
-      "status": "not_started",
+      "dependencies": [
+        "feat-001"
+      ],
+      "status": "passing",
       "verification": [
         "Run `npm run typecheck && npm run build` — compiles with the new loader.",
         "If a dev store is connected: `npm run dev` lists product titles + prices (screenshot)."
       ],
-      "evidence": []
+      "evidence": [
+        "Loader added to app/routes/app._index.tsx: Admin GraphQL products(first:50) -> {id,title,first-variant price,compareAtPrice}. npm run typecheck -> 0 errors; npm run build -> success (2026-06-26).",
+        "Live product list render verified only with a connected dev store (manual, deferred to demo)."
+      ]
     },
     {
       "id": "feat-004",
@@ -72,13 +79,19 @@
       "area": "ui",
       "title": "Polaris UI: selection, rule form, live preview",
       "user_visible_behavior": "Merchant selects products, sets a percentage + toggles, and sees a live before/after price preview before applying.",
-      "dependencies": ["feat-002", "feat-003"],
-      "status": "not_started",
+      "dependencies": [
+        "feat-002",
+        "feat-003"
+      ],
+      "status": "passing",
       "verification": [
         "Run `npm run typecheck && npm run build`.",
         "If a dev store is connected: selecting rows and changing the rule updates the preview live (screenshot)."
       ],
-      "evidence": []
+      "evidence": [
+        "Polaris UI in app/routes/app._index.tsx: IndexTable product selection (useIndexResourceState) + rule form (percentage TextField + round-to-.99 + set-compare-at checkboxes) + live before->after preview computed via app/lib/pricing.ts (computeNewPrice/formatMoney). Empty-state + submitting (loading) states handled.",
+        "npm run typecheck -> 0 errors; npm run lint -> clean; npm run build -> success (2026-06-26)."
+      ]
     },
     {
       "id": "feat-005",
@@ -86,13 +99,19 @@
       "area": "data-write",
       "title": "Apply action (productVariantsBulkUpdate write)",
       "user_visible_behavior": "Clicking Apply writes new prices (and optional compare-at) to the selected products; a success banner reports updated/skipped counts.",
-      "dependencies": ["feat-004"],
-      "status": "not_started",
+      "dependencies": [
+        "feat-004"
+      ],
+      "status": "in_progress",
       "verification": [
         "Run `npm run typecheck && npm run build`.",
         "Live demo on a dev store: select products → -20% → Apply → confirm new price + strikethrough compare-at in Shopify admin (before/after screenshots)."
       ],
-      "evidence": [],
+      "evidence": [
+        "Apply action implemented in app/routes/app._index.tsx: parses rule+ids, re-reads products server-side (trusted), buildVariantUpdate (pricing.ts) -> productVariantsBulkUpdate mutation per product, aggregates {updated,skipped,errors} -> success/warning Banner.",
+        "npm run typecheck + npm run lint + npm run build all green (2026-06-26).",
+        "REMAINING GATE (not yet captured): live store write demo (select -> -20% -> Apply -> new price + strikethrough compare-at visible in Shopify admin) requires the user Partner dev store + app linked (npm run config:link). Cannot be verified offline."
+      ],
       "notes": "Requires the dev store + write_products scope. This is the real end-to-end demo evidence."
     },
     {
@@ -101,7 +120,9 @@
       "area": "polish",
       "title": "Polish + capture demo evidence",
       "user_visible_behavior": "Empty-state + submitting state handled; demo screenshots/log captured under docs/demo/.",
-      "dependencies": ["feat-005"],
+      "dependencies": [
+        "feat-005"
+      ],
       "status": "not_started",
       "verification": [
         "Run `bash init.sh` — HARNESS GREEN.",
@@ -115,7 +136,9 @@
       "area": "docs",
       "title": "Docs, handoff, and presentation file",
       "user_visible_behavior": "docs/PRESENTATION.md answers the six course questions; README + handoff updated; clean state.",
-      "dependencies": ["feat-006"],
+      "dependencies": [
+        "feat-006"
+      ],
       "status": "not_started",
       "verification": [
         "docs/PRESENTATION.md exists and answers all six questions.",
