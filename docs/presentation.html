@@ -162,6 +162,7 @@ slides.push(`<div class="slide">
   <h2>Đã áp dụng kiến thức nào từ khoá học?</h2>
   <div class="card tight"><table style="font-size:14.5px">
     <tr><th style="width:34%">Kiến thức</th><th>Đã áp dụng cụ thể</th></tr>
+    <tr><td><strong>Tự dựng harness (file lõi)</strong></td><td><strong>Tự tạo các file biến repo thành "spec"</strong> để agent tự vận hành: <code>AGENTS.md</code>/<code>CLAUDE.md</code>, <code>init.sh</code>, <code>feature_list.json</code>, <code>claude-progress.md</code>, <code>session-handoff.md</code>, <code>docs/</code>.</td></tr>
     <tr><td><strong>Hooks / permissions</strong></td><td>Cấu hình quyền chạy lệnh trong <code>.claude/settings.json</code> (allowlist) — giới hạn theo nhu cầu.</td></tr>
     <tr><td><strong>Verification</strong></td><td><code>init.sh</code> chạy chuỗi typecheck → lint → test → build; <strong>"done" phải có bằng chứng</strong> dán vào <code>feature_list.json</code>.</td></tr>
     <tr><td><strong>Testing</strong></td><td><strong>TDD</strong> với Vitest trên lõi thuần <code>pricing.ts</code>/<code>filter.ts</code> → <strong>29 test</strong> (đỏ trước, xanh sau).</td></tr>
