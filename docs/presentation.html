@@ -99,8 +99,8 @@ slides.push(`<div class="slide">
 
 // 2 — Mục tiêu
 slides.push(`<div class="slide">
-  <span class="eyebrow">1 · Mục tiêu của app</span>
-  <h2>App giải quyết vấn đề gì?</h2>
+  <span class="eyebrow">Câu hỏi 1</span>
+  <h2>Mục tiêu của app là gì?</h2>
   <div class="card" style="border-color:#4a3e92;background:linear-gradient(180deg,#1d2350,#231a47)">
     <p style="font-size:20px;margin:.2em 0">Cho phép chủ shop <strong>đổi giá hàng loạt sản phẩm trong vài cú nhấp</strong> — ví dụ chạy một đợt sale −20% — thay vì sửa từng sản phẩm một.</p>
   </div>
@@ -142,25 +142,39 @@ slides.push(`<div class="slide">
   <div class="why" style="margin-top:12px"><h3>Lõi logic thuần &amp; được test</h3><p style="margin:.2em 0">Toàn bộ phép tính giá nằm trong <code>app/lib/pricing.ts</code> — hàm thuần, không phụ thuộc Shopify/React — nên kiểm thử đơn vị dễ dàng (đây là phần "Phản hồi/Verification" của harness).</p></div>
 </div>`);
 
-// 5 — Kiến thức áp dụng
+// 5 — Kiến thức áp dụng (phần A: từng kiến thức cụ thể)
 slides.push(`<div class="slide">
-  <span class="eyebrow">2 · Kiến thức từ khoá học đã áp dụng</span>
-  <h2>Bản đồ 5 hệ thống phụ → file trong repo</h2>
-  <div class="card tight"><table>
-    <tr><th>Khái niệm</th><th>Thể hiện ở đâu trong repo</th></tr>
-    <tr><td><span class="pill">Hướng dẫn</span></td><td class="mono">AGENTS.md / CLAUDE.md, docs/PRODUCT.md, docs/ARCHITECTURE.md</td></tr>
-    <tr><td><span class="pill env">Môi trường</span></td><td class="mono">init.sh, .nvmrc, package.json, package-lock.json</td></tr>
-    <tr><td><span class="pill state">Trạng thái</span></td><td class="mono">feature_list.json (DAG + evidence), claude-progress.md</td></tr>
-    <tr><td><span class="pill fb">Phản hồi</span></td><td class="mono">init.sh (typecheck + lint + test + build) + Vitest</td></tr>
-    <tr><td><span class="pill">Vòng đời</span></td><td class="mono">session-handoff.md, clean state</td></tr>
+  <span class="eyebrow">Câu hỏi 2 · (phần 1/2)</span>
+  <h2>Đã áp dụng kiến thức nào từ khoá học?</h2>
+  <div class="card tight"><table style="font-size:14.5px">
+    <tr><th style="width:34%">Kiến thức</th><th>Đã áp dụng cụ thể</th></tr>
+    <tr><td><strong>Planning</strong></td><td>Viết <strong>spec</strong> rồi <strong>plan</strong> (trong <code>docs/superpowers/</code>) trước khi code — không code khi chưa rõ.</td></tr>
+    <tr><td><strong>Delegation</strong></td><td>Mỗi feature do một <strong>subagent thực thi</strong>, một <strong>subagent khác review</strong> — tách "người làm" khỏi "người kiểm".</td></tr>
+    <tr><td><strong>Prompt / context engineering</strong></td><td>Mỗi subagent nhận đúng <strong>1 task brief</strong> (không nhồi cả plan) → ngữ cảnh gọn, thay đổi tập trung.</td></tr>
+    <tr><td><strong>Claude Code</strong></td><td>Agent AI chạy toàn bộ vòng lặp: dựng app, viết test, sửa lỗi, commit.</td></tr>
+    <tr><td><strong>CLAUDE.md / AGENTS.md</strong></td><td><code>AGENTS.md</code> là nguồn sự thật; <code>CLAUDE.md</code> chỉ trỏ về nó (tránh mâu thuẫn).</td></tr>
   </table></div>
-  <p class="muted" style="margin-top:10px">Cộng thêm: <strong>lập kế hoạch trước khi code</strong> (spec → plan), <strong>uỷ thác cho subagent</strong> (người làm tách khỏi người kiểm), <strong>prompt/context engineering</strong>, <strong>TDD</strong>, và <strong>"done" phải có bằng chứng</strong>.</p>
+</div>`);
+
+// 5b — Kiến thức áp dụng (phần B)
+slides.push(`<div class="slide">
+  <span class="eyebrow">Câu hỏi 2 · (phần 2/2)</span>
+  <h2>Đã áp dụng kiến thức nào từ khoá học?</h2>
+  <div class="card tight"><table style="font-size:14.5px">
+    <tr><th style="width:34%">Kiến thức</th><th>Đã áp dụng cụ thể</th></tr>
+    <tr><td><strong>Hooks / permissions</strong></td><td>Cấu hình quyền chạy lệnh trong <code>.claude/settings.json</code> (allowlist) — giới hạn theo nhu cầu.</td></tr>
+    <tr><td><strong>Verification</strong></td><td><code>init.sh</code> chạy chuỗi typecheck → lint → test → build; <strong>"done" phải có bằng chứng</strong> dán vào <code>feature_list.json</code>.</td></tr>
+    <tr><td><strong>Testing</strong></td><td><strong>TDD</strong> với Vitest trên lõi thuần <code>pricing.ts</code>/<code>filter.ts</code> → <strong>29 test</strong> (đỏ trước, xanh sau).</td></tr>
+    <tr><td><strong>Guardrails</strong></td><td>Mỗi lúc 1 feature; tôn trọng DAG; module giá <strong>thuần</strong> (không import framework); không commit <code>.env</code>; giữ secret ngoài git.</td></tr>
+    <tr><td><strong>Harness workflow</strong></td><td>Vòng <strong>act → verify → feedback</strong>, để lại <strong>clean state</strong>, bàn giao qua <code>session-handoff.md</code>.</td></tr>
+  </table></div>
+  <p class="muted" style="margin-top:8px">Ánh xạ 5 hệ thống phụ: Hướng dẫn = AGENTS/CLAUDE/docs · Môi trường = init.sh/.nvmrc/package · Trạng thái = feature_list/progress · Phản hồi = init.sh + Vitest · Vòng đời = session-handoff.</p>
 </div>`);
 
 // 6 — AI hỗ trợ
 slides.push(`<div class="slide">
-  <span class="eyebrow">3 · AI (Claude Code) đã hỗ trợ thế nào</span>
-  <h2>AI làm những gì trong quá trình</h2>
+  <span class="eyebrow">Câu hỏi 3</span>
+  <h2>AI đã hỗ trợ phần nào trong quá trình làm?</h2>
   <div class="grid g2">
     <div class="card tight"><h3>🏗️ Dựng harness</h3><p>Biến template rỗng thành harness riêng cho app (AGENTS.md, feature DAG, init.sh, docs).</p></div>
     <div class="card tight"><h3>🧪 Viết test trước</h3><p>Viết test Vitest đỏ trước, rồi mới viết <code>pricing.ts</code> cho xanh (TDD).</p></div>
@@ -172,8 +186,8 @@ slides.push(`<div class="slide">
 
 // 7 — Kết quả
 slides.push(`<div class="slide">
-  <span class="eyebrow">4 · Kết quả đạt được</span>
-  <h2>App chạy được, kiểm thử xanh</h2>
+  <span class="eyebrow">Câu hỏi 4</span>
+  <h2>Kết quả đạt được là gì?</h2>
   <div class="grid g2" style="align-items:start">
     <div class="card tight"><h3>Chất lượng (bằng chứng)</h3><ul>
       <li><span class="ok">typecheck 0 lỗi</span></li>
@@ -194,8 +208,8 @@ slides.push(`<div class="slide">
 
 // 8 — Khó khăn
 slides.push(`<div class="slide">
-  <span class="eyebrow">5 · Khó khăn &amp; cách xử lý</span>
-  <h2>5 vấn đề thật đã gặp</h2>
+  <span class="eyebrow">Câu hỏi 5</span>
+  <h2>Khó khăn gặp phải và cách xử lý</h2>
   <div class="grid g2">
     <div class="card tight"><h3>① create-app cần tương tác</h3><p>CLI bắt chọn Partner-org thủ công → <strong>clone thẳng template</strong> từ GitHub.</p></div>
     <div class="card tight"><h3>② Lệch phiên bản dependency</h3><p>Hai bản <code>@shopify/shopify-api</code> làm hỏng kiểu Session → <strong>ghim 13.1.0</strong> bằng overrides.</p></div>
@@ -208,8 +222,8 @@ slides.push(`<div class="slide">
 
 // 9 — Bài học
 slides.push(`<div class="slide">
-  <span class="eyebrow">6 · Bài học rút ra</span>
-  <h2>Điều đọng lại sau project</h2>
+  <span class="eyebrow">Câu hỏi 6</span>
+  <h2>Bài học rút ra sau project</h2>
   <ul>
     <li><strong>Harness "tự trả công".</strong> Nhờ <code>init.sh</code> chạy đủ chuỗi verify, mọi lỗi lộ ra ngay với thông báo rõ — thay vì ẩn tới lúc demo.</li>
     <li><strong>"Done" phải có bằng chứng</strong> giúp đánh dấu trung thực: feat-005 vẫn để <em>in_progress</em> vì còn thiếu bước ghi giá thật trên store.</li>
