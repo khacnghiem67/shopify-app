@@ -178,8 +178,21 @@ export default function Index() {
             {p.title}
           </Text>
         </IndexTable.Cell>
-        <IndexTable.Cell>{p.price}</IndexTable.Cell>
-        <IndexTable.Cell>{next}</IndexTable.Cell>
+        <IndexTable.Cell>
+          <Text as="span" variant="bodyMd">
+            {p.price}
+          </Text>
+        </IndexTable.Cell>
+        <IndexTable.Cell>
+          <Text
+            as="span"
+            variant="bodyMd"
+            fontWeight={selected ? "semibold" : "regular"}
+            tone={selected ? "success" : "subdued"}
+          >
+            {next}
+          </Text>
+        </IndexTable.Cell>
       </IndexTable.Row>
     );
   });
