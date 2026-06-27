@@ -139,12 +139,16 @@
       "dependencies": [
         "feat-006"
       ],
-      "status": "not_started",
+      "status": "passing",
       "verification": [
         "docs/PRESENTATION.md exists and answers all six questions.",
         "Run `bash init.sh && git status --short` — green, no stray/.env files."
       ],
-      "evidence": []
+      "evidence": [
+        "docs/PRESENTATION.md written: answers all six course questions (goal, knowledge applied, how AI helped, results, difficulties+fixes, lessons) + a live demo script.",
+        "README.md rewritten for the BulkPrice app + repo. docs/demo/ placeholder added for demo screenshots.",
+        "bash init.sh -> HARNESS GREEN (typecheck + lint + 18/18 tests + build). git tree clean, no .env committed."
+      ]
     }
   ]
 }

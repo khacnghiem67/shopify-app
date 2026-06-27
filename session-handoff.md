@@ -3,8 +3,9 @@
 ## Current Objective
 
 - Goal: Build the BulkPrice Shopify app (bulk product price editor) demonstrating the Harness methodology.
-- Current status: feat-001 + feat-002 **passing**. App scaffolded + green; pure pricing core done & tested.
-- Branch / commit: `feat/bulkprice-app` — see `git log --oneline -6`.
+- Current status: feat-001/002/003/004/007 **passing**; feat-005/006 code-complete & building, awaiting the live-store demo. `bash init.sh` → HARNESS GREEN.
+- Branch / commit: `feat/bulkprice-app` (pushed to remote `submit` = github.com/khacnghiem67/shopify-app, branch `main`).
+- The ONE remaining task: the live-store demo (feat-005/006) — needs a Partner dev store; produces the apply evidence + screenshots.
 
 ## Completed This Session
 

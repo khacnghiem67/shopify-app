@@ -1,42 +1,54 @@
-# harness-agent
+# BulkPrice — Shopify bulk price editor
 
-A minimal, tool-agnostic **harness for AI coding agents**. It gives an agent a
-reliable way to start, stay in scope, verify its work, and resume across
-sessions — instead of guessing each time.
+An embedded **Shopify admin app** that lets a merchant change prices on many
+products at once: select products → pick a rule (percentage change, optional
+round-to-.99, optional set-compare-at-to-original) → preview before/after →
+**Apply**. Built on the official Shopify Remix template (Remix + Polaris + App
+Bridge + Prisma).
 
-The structure follows the five-subsystem model from
-[Learn Harness Engineering](https://github.com/):
+This is the final project for the *Harness Design, Team Adoption & Cross-Model*
+course — it is built to demonstrate the AI-harness methodology (5 subsystems,
+planning, TDD, evidence-gated "done", guardrails). See **`docs/PRESENTATION.md`**
+for the demo write-up and the six course answers.
 
-| Subsystem | Artifact | Purpose |
-|---|---|---|
-| Instructions | `AGENTS.md` / `CLAUDE.md` | Startup path, working rules, definition of done |
-| State | `feature_list.json`, `claude-progress.md` | Current feature, status, evidence, next step |
-| Verification | `init.sh` | Install + checks the agent must run before claiming done |
-| Scope | feature priorities & done criteria | Prevents overreach and half-finished work |
-| Lifecycle | `session-handoff.md`, end-of-session routine | Makes the next session restartable |
+## Quick start
 
-## Files
+```bash
+nvm use            # Node 22 (see .nvmrc)
+bash init.sh       # install + verify: typecheck + lint + test + build -> HARNESS GREEN
+```
 
-- **`AGENTS.md`** — canonical entrypoint for any agent. Start here.
-- **`CLAUDE.md`** — Claude Code operating loop; points back to `AGENTS.md`.
-- **`feature_list.json`** — source of truth for feature state and verification.
-- **`claude-progress.md`** — session log and current verified status.
-- **`init.sh`** — standard startup + verification path.
-- **`session-handoff.md`** — compact handoff for larger multi-session work.
+`init.sh` is green **without** a connected store. To run the app live against a
+Shopify **Partner dev store** (manual demo step):
 
-## How to adopt it
+```bash
+npm run config:link   # link this app to your Partner org/app (interactive)
+npm run dev           # opens the embedded app in your dev store
+```
 
-1. Drop these files into your project root (or use this repo as the seed).
-2. Replace the placeholder commands in `init.sh` with your real install /
-   verify / start commands.
-3. Replace the example feature in `feature_list.json` with your real features.
-4. Point your agent at `AGENTS.md` and let it follow the startup workflow.
+## How it's built
 
-## The contract
+| Piece | File |
+|---|---|
+| Pure pricing logic (no framework imports) + tests | `app/lib/pricing.ts`, `app/lib/pricing.test.ts` |
+| App route: loader (read) + Polaris UI + action (write) | `app/routes/app._index.tsx` |
+| Admin GraphQL: `products` (read), `productVariantsBulkUpdate` (write) | see `docs/ARCHITECTURE.md` |
 
-An agent working in this repo must:
+## The harness (course methodology)
 
-- work on **one** feature at a time,
-- run the verification before marking anything `passing`,
-- record **evidence**, not just claims,
-- leave the repo restartable from `./init.sh`.
+| Subsystem | Artifact |
+|---|---|
+| Guidance | `AGENTS.md` / `CLAUDE.md`, `docs/PRODUCT.md`, `docs/ARCHITECTURE.md` |
+| Environment | `init.sh`, `.nvmrc`, `package.json`, `package-lock.json` |
+| State | `feature_list.json`, `claude-progress.md` |
+| Feedback | `init.sh` verify chain + Vitest; evidence required before `passing` |
+| Lifecycle | `session-handoff.md` |
+
+Design spec and step-by-step plan: `docs/superpowers/`.
+
+## Status
+
+`bash init.sh` → **HARNESS GREEN** (typecheck, lint, 18/18 tests, build).
+feat-001…004 + feat-007 **passing**; feat-005/006 are code-complete and build,
+with the live-store write demo + screenshots as the one remaining manual step
+(needs a Partner dev store). See `feature_list.json`.
