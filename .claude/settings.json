@@ -4,5 +4,35 @@
     "superpowers@claude-plugins-official": true,
     "shopify-plugin@shopify-ai-toolkit": true,
     "frontend-design@claude-plugins-official": true
+  },
+  "permissions": {
+    "allow": [
+      "Bash(npm run typecheck)",
+      "Bash(npm run lint)",
+      "Bash(npm run test)",
+      "Bash(npm run build)",
+      "Bash(npx vitest run*)",
+      "Bash(bash init.sh)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/test-on-code-change.sh",
+            "timeout": 120,
+            "statusMessage": "Running unit tests (harness hook)…"
+          }
+        ]
+      }
+    ]
   }
 }
