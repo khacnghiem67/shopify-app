@@ -5,9 +5,11 @@
 - Repository root: shopify-app (branch `feat/bulkprice-app`)
 - App: official Shopify Remix template (Remix 2 + Polaris 12 + Prisma) → BulkPrice bulk price editor
 - Standard startup + verification path: `bash init.sh` (Node 22 → install → prisma generate → typecheck → lint → test → build)
-- Last verification: **HARNESS GREEN** (2026-06-26): typecheck + lint + 18/18 tests + build all pass, including the new BulkPrice route.
-- Current highest-priority unfinished feature: **feat-005/006** — code complete & builds; the only remaining work is the **live store write demo + screenshots**, which needs a Partner dev store.
+- Last verification (2026-06-26): typecheck 0 · lint clean · **29/29 tests** · build ✓. (`bash init.sh` also runs `prisma generate`, which can EPERM if `npm run dev` is holding the engine DLL — stop dev first, or run the four checks directly.)
+- Features passing: feat-001, 002, 003, 004, 007, 008 (search/filter), 009 (fixed-amount rule). feat-005 in_progress, feat-006 not_started.
+- Current highest-priority unfinished feature: **feat-005/006** — code complete & builds; only the **live store write demo + screenshots** remain (needs a Partner dev store).
 - Current blocker: none for offline work; live demo requires the user's dev store.
+- Runnability fix shipped: added `shopify.web.toml` (the clone lacked it) so `shopify app dev` serves the embedded app instead of the grey placeholder.
 
 ## Session Log
 
@@ -24,6 +26,13 @@
 - **feat-003 + feat-004 (passing)**: BulkPrice route in `app/routes/app._index.tsx` — loader reads products via Admin GraphQL; Polaris IndexTable selection + rule form + live before/after preview (using pricing.ts); empty-state + submitting states. typecheck + lint + build green (commit 4b74da3).
 - **feat-005 (in_progress)**: Apply action (`productVariantsBulkUpdate`, server-side re-read, updated/skipped/errors banner) — code complete & builds; **live store write demo pending a Partner dev store**.
 - **feat-007 (passing)**: `docs/PRESENTATION.md` (six course answers + demo script), README rewrite, `docs/demo/` placeholder.
+
+### Session 004 — Extra features + fixes (2026-06-26)
+- Added `shopify.web.toml` + restored `write_products` scope (fixes the grey "Find this app" placeholder; `app dev` had no web process to run).
+- feat-008 product search/filter (pure `filterByTitle` + 5 tests + Polaris search box).
+- feat-009 fixed-amount rule (pure `applyFixedAmount` + 6 tests + Operation dropdown). Suite now 29/29.
+- UI fix: wrapped IndexTable price cells in `<Text>` (bare text was hidden on row hover); new price tints green when selected.
+- All pushed to remote `submit`/main. Remaining: live store demo (feat-005/006).
 
 ### Session 003 — Route + docs (2026-06-26)
 - Built feat-003/004/005 as one cohesive route (inline, after subagent runs were interrupted by process exits); verified typecheck/lint/build + full `init.sh` GREEN.
