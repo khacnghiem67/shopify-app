@@ -197,12 +197,20 @@ slides.push(`<div class="slide">
       <li><span class="ok">build thành công</span></li>
       <li><code>bash init.sh</code> → <strong>HARNESS GREEN</strong></li>
     </ul></div>
-    <div class="card tight"><h3>Trạng thái tính năng</h3><table>
-      <tr><td>001 setup · 002 pricing · 003 loader</td><td class="ok">passing</td></tr>
-      <tr><td>004 UI · 007 docs</td><td class="ok">passing</td></tr>
-      <tr><td>008 tìm kiếm · 009 giá cố định</td><td class="ok">passing</td></tr>
-      <tr><td>005 ghi giá · 006 ảnh demo</td><td><span class="pill state">cần dev store</span></td></tr>
-    </table></div>
+    <div class="card tight"><h3>Trạng thái tính năng</h3>
+      <p style="margin:.2em 0 6px"><span class="ok">✅ Đã xong</span> <span class="muted" style="font-size:13px">(code chạy + test xanh)</span></p>
+      <ul style="margin:.1em 0">
+        <li>Dựng app + harness xanh</li>
+        <li>Logic tính giá + 29 unit test</li>
+        <li>Tải &amp; tìm kiếm danh sách sản phẩm</li>
+        <li>Giao diện chọn + xem trước giá</li>
+        <li>Quy tắc: phần trăm &amp; số tiền cố định</li>
+      </ul>
+      <p style="margin:10px 0 6px"><span class="pill state">🟡 Còn lại</span> <span class="muted" style="font-size:13px">(cần cửa hàng dev để demo)</span></p>
+      <ul style="margin:.1em 0">
+        <li>Ghi giá thật vào Shopify + ảnh chụp demo</li>
+      </ul>
+    </div>
   </div>
   <p class="muted" style="margin-top:10px">Lịch sử commit chính là câu chuyện phương pháp: spec → plan → từng feature, mỗi commit kèm bằng chứng.</p>
 </div>`);
