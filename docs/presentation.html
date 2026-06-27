@@ -210,13 +210,14 @@ slides.push(`<div class="slide">
 slides.push(`<div class="slide">
   <span class="eyebrow">Câu hỏi 5</span>
   <h2>Khó khăn gặp phải và cách xử lý</h2>
-  <div class="grid g2">
-    <div class="card tight"><h3>① create-app cần tương tác</h3><p>CLI bắt chọn Partner-org thủ công → <strong>clone thẳng template</strong> từ GitHub.</p></div>
-    <div class="card tight"><h3>② Lệch phiên bản dependency</h3><p>Hai bản <code>@shopify/shopify-api</code> làm hỏng kiểu Session → <strong>ghim 13.1.0</strong> bằng overrides.</p></div>
-    <div class="card tight"><h3>③ ESLint crash với test</h3><p><code>eslint-plugin-jest</code> tìm Jest (ta dùng Vitest) → <strong>ghim jest version</strong> trong .eslintrc.</p></div>
-    <div class="card tight"><h3>④ node_modules hỏng</h3><p>Chạy 2 <code>npm install</code> song song gây lỗi → <strong>cài lại sạch, 1 tiến trình</strong>.</p></div>
-    <div class="card tight"><h3>⑤ Secret chặn push</h3><p>GitHub phát hiện 1 chuỗi giống Stripe key trong slide bài giảng → <strong>không bypass</strong>, xoá khỏi lịch sử git rồi push lại.</p></div>
-    <div class="card tight"><h3>⑥ Màn hình xám "Find this app"</h3><p>Thiếu <code>shopify.web.toml</code> nên dev không chạy web → <strong>thêm file</strong>, app hiện đúng.</p></div>
+  <p class="lead" style="margin-top:-4px">Phần lớn khó khăn nằm ở <strong>cách làm việc với AI</strong> — và harness chính là thứ giúp xử lý.</p>
+  <div class="grid g2" style="margin-top:8px">
+    <div class="card tight"><h3>🤖 AI bị gián đoạn giữa chừng</h3><p>Subagent dừng đột ngột (mất phiên). → Nhờ <strong>Trạng thái</strong> (<code>feature_list.json</code> + progress ledger) và <strong>clean state</strong>, khôi phục đúng chỗ đã làm, không mất tiến độ.</p></div>
+    <div class="card tight"><h3>🤖 AI dễ "tự nhận đã xong"</h3><p>Model có thể tuyên bố hoàn thành khi chưa chắc. → <strong>Evidence-gating</strong>: chỉ đánh dấu done khi dán output verify thật; thêm <strong>subagent review</strong> (tách người làm / người kiểm).</p></div>
+    <div class="card tight"><h3>🤖 AI dễ lạc ngữ cảnh khi việc nhiều</h3><p>→ <strong>Prompt/context engineering</strong>: mỗi subagent chỉ nhận <strong>đúng 1 brief</strong>, <code>AGENTS.md</code> là nguồn sự thật duy nhất → thay đổi gọn, đúng phạm vi.</p></div>
+    <div class="card tight"><h3>🤖 AI chạy headless, gặp bước cần con người</h3><p>Một số bước cần đăng nhập/chọn store (tương tác). → AI <strong>tự nhận ra giới hạn</strong>, đổi cách làm và <strong>bàn giao</strong> bước thủ công cho người.</p></div>
+    <div class="card tight"><h3>🤖 AI có thể sai nếu thiếu vòng phản hồi</h3><p>→ <strong>Harness/verification</strong>: <code>init.sh</code> chạy đủ chuỗi kiểm tra; AI <strong>tự đọc kết quả và sửa</strong> tới khi xanh — con người không phải làm trọng tài từng bước.</p></div>
+    <div class="card tight"><h3>🤖 Giữ AI trong "lằn ranh" an toàn</h3><p>Khi AI thao tác git và gặp cảnh báo bảo mật lúc push, AI <strong>tuân thủ guardrail</strong> (không bỏ qua cảnh báo) và xử lý đúng quy trình.</p></div>
   </div>
 </div>`);
 
