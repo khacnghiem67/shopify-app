@@ -166,7 +166,7 @@ slides.push(`<div class="slide">
     <tr><td><strong>Hooks / permissions</strong></td><td>Cấu hình quyền chạy lệnh trong <code>.claude/settings.json</code> (allowlist) — giới hạn theo nhu cầu.</td></tr>
     <tr><td><strong>Verification</strong></td><td><code>init.sh</code> chạy chuỗi typecheck → lint → test → build; <strong>"done" phải có bằng chứng</strong> dán vào <code>feature_list.json</code>.</td></tr>
     <tr><td><strong>Testing</strong></td><td><strong>TDD</strong> với Vitest trên lõi thuần <code>pricing.ts</code>/<code>filter.ts</code> → <strong>29 test</strong> (đỏ trước, xanh sau).</td></tr>
-    <tr><td><strong>Guardrails</strong></td><td>Mỗi lúc 1 feature; tôn trọng DAG; module giá <strong>thuần</strong> (không import framework); không commit <code>.env</code>; giữ secret ngoài git.</td></tr>
+    <tr><td><strong>Guardrails</strong><br/><span class="muted" style="font-size:12.5px">(rào chắn an toàn cho AI)</span></td><td>Đặt sẵn <strong>giới hạn để AI không làm sai phạm vi</strong>: mỗi lúc chỉ làm <strong>1 feature</strong> &amp; theo đúng thứ tự phụ thuộc; <strong>không commit file bí mật</strong> (<code>.env</code>, secret); tách <strong>logic giá thành module thuần</strong> để luôn test được. → AI "đi đúng đường ray".</td></tr>
     <tr><td><strong>Harness workflow</strong></td><td>Vòng <strong>act → verify → feedback</strong>, để lại <strong>clean state</strong>, bàn giao qua <code>session-handoff.md</code>.</td></tr>
   </table></div>
   <p class="muted" style="margin-top:8px">Ánh xạ 5 hệ thống phụ: Hướng dẫn = AGENTS/CLAUDE/docs · Môi trường = init.sh/.nvmrc/package · Trạng thái = feature_list/progress · Phản hồi = init.sh + Vitest · Vòng đời = session-handoff.</p>
