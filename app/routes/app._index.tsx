@@ -23,6 +23,7 @@ import {
   formatMoney,
   type Rule,
 } from "../lib/pricing";
+import { filterByTitle } from "../lib/filter";
 
 const GET_PRODUCTS = `#graphql
   query GetProducts {
@@ -139,13 +140,21 @@ export default function Index() {
   const [percent, setPercent] = useState("-20");
   const [roundTo99, setRoundTo99] = useState(true);
   const [setCompareAt, setSetCompareAt] = useState(true);
+  const [query, setQuery] = useState("");
 
+  // Selection state keys off product ids over the full set, so selections
+  // persist even while the visible list is filtered by the search box.
   const resourceIds = useMemo(
     () => products.map((p) => ({ id: p.id })),
     [products],
   );
   const { selectedResources, allResourcesSelected, handleSelectionChange } =
     useIndexResourceState(resourceIds);
+
+  const visibleProducts = useMemo(
+    () => filterByTitle(products, query),
+    [products, query],
+  );
 
   const rule: Rule = {
     operation: "percentage",
@@ -154,7 +163,7 @@ export default function Index() {
     setCompareAtToOriginal: setCompareAt,
   };
 
-  const rows = products.map((p, index) => {
+  const rows = visibleProducts.map((p, index) => {
     const selected = selectedResources.includes(p.id);
     const orig = parseMoney(p.price) ?? 0;
     const next = selected ? formatMoney(computeNewPrice(orig, rule)) : "—";
@@ -214,21 +223,39 @@ export default function Index() {
                 then reload.
               </Text>
             ) : (
-              <IndexTable
-                resourceName={{ singular: "product", plural: "products" }}
-                itemCount={products.length}
-                selectedItemsCount={
-                  allResourcesSelected ? "All" : selectedResources.length
-                }
-                onSelectionChange={handleSelectionChange}
-                headings={[
-                  { title: "Product" },
-                  { title: "Current price" },
-                  { title: "New price" },
-                ]}
-              >
-                {rows}
-              </IndexTable>
+              <BlockStack gap="300">
+                <TextField
+                  label="Search products"
+                  labelHidden
+                  placeholder="Search products by name…"
+                  value={query}
+                  onChange={setQuery}
+                  clearButton
+                  onClearButtonClick={() => setQuery("")}
+                  autoComplete="off"
+                />
+                {visibleProducts.length === 0 ? (
+                  <Text as="p" variant="bodyMd" tone="subdued">
+                    No products match “{query}”.
+                  </Text>
+                ) : (
+                  <IndexTable
+                    resourceName={{ singular: "product", plural: "products" }}
+                    itemCount={visibleProducts.length}
+                    selectedItemsCount={
+                      allResourcesSelected ? "All" : selectedResources.length
+                    }
+                    onSelectionChange={handleSelectionChange}
+                    headings={[
+                      { title: "Product" },
+                      { title: "Current price" },
+                      { title: "New price" },
+                    ]}
+                  >
+                    {rows}
+                  </IndexTable>
+                )}
+              </BlockStack>
             )}
 
             <Form method="post">

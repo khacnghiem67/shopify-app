@@ -149,6 +149,27 @@
         "README.md rewritten for the BulkPrice app + repo. docs/demo/ placeholder added for demo screenshots.",
         "bash init.sh -> HARNESS GREEN (typecheck + lint + 18/18 tests + build). git tree clean, no .env committed."
       ]
+    },
+    {
+      "id": "feat-008",
+      "priority": 8,
+      "area": "ui",
+      "title": "Product search / filter",
+      "user_visible_behavior": "A search box filters the product list by name; selections persist across filtering; a no-match message shows when nothing matches.",
+      "dependencies": [
+        "feat-004"
+      ],
+      "status": "passing",
+      "verification": [
+        "Run `npm run test` — filterByTitle unit tests green.",
+        "Run `npm run typecheck && npm run lint && npm run build` — all pass."
+      ],
+      "evidence": [
+        "Pure helper app/lib/filter.ts (filterByTitle: trim + case-insensitive title match, empty query returns all) added test-first; app/lib/filter.test.ts 5/5 (RED confirmed before impl).",
+        "Wired into app/routes/app._index.tsx: Polaris TextField search box, visibleProducts = filterByTitle(products, query), no-match empty state; selection state kept over all products so it persists across filtering.",
+        "npm run typecheck -> 0 errors; npm run lint -> clean; npm run test -> 23/23 (18 pricing + 5 filter); npm run build -> success (2026-06-26)."
+      ],
+      "notes": "Filtering is client-side over the first 50 loaded products (matches the read scope). Pure logic kept framework-free for unit testing."
     }
   ]
 }
