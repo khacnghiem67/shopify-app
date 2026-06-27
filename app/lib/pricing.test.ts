@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   applyPercentage,
+  applyFixedAmount,
   roundTo99,
   computeNewPrice,
   parseMoney,
@@ -9,7 +10,13 @@ import {
   type Rule,
 } from "./pricing";
 
-const base: Rule = { operation: "percentage", percent: 0, roundTo99: false, setCompareAtToOriginal: false };
+const base: Rule = {
+  operation: "percentage",
+  percent: 0,
+  amount: 0,
+  roundTo99: false,
+  setCompareAtToOriginal: false,
+};
 
 describe("parseMoney/formatMoney", () => {
   it("parses a money string", () => expect(parseMoney("15.99")).toBe(15.99));
@@ -27,6 +34,11 @@ describe("applyPercentage", () => {
   it("increases by 10%", () => expect(applyPercentage(50, 10)).toBeCloseTo(55));
 });
 
+describe("applyFixedAmount", () => {
+  it("subtracts a fixed amount", () => expect(applyFixedAmount(100, -5)).toBeCloseTo(95));
+  it("adds a fixed amount", () => expect(applyFixedAmount(20, 2.5)).toBeCloseTo(22.5));
+});
+
 describe("roundTo99", () => {
   it("23.40 -> 23.99", () => expect(roundTo99(23.4)).toBeCloseTo(23.99));
   it("23.00 -> 23.99", () => expect(roundTo99(23)).toBeCloseTo(23.99));
@@ -35,8 +47,16 @@ describe("roundTo99", () => {
 describe("computeNewPrice", () => {
   it("percentage then round", () =>
     expect(computeNewPrice(100, { ...base, percent: -20, roundTo99: true })).toBeCloseTo(80.99));
-  it("never returns <= 0 (clamps to 0.01)", () =>
+  it("fixed amount then round", () =>
+    expect(
+      computeNewPrice(100, { ...base, operation: "fixed", amount: -5, roundTo99: true }),
+    ).toBeCloseTo(95.99));
+  it("fixed amount without rounding", () =>
+    expect(computeNewPrice(50, { ...base, operation: "fixed", amount: -7.5 })).toBeCloseTo(42.5));
+  it("never returns <= 0 (clamps to 0.01) for percentage", () =>
     expect(computeNewPrice(10, { ...base, percent: -100 })).toBe(0.01));
+  it("never returns <= 0 (clamps to 0.01) for fixed amount", () =>
+    expect(computeNewPrice(10, { ...base, operation: "fixed", amount: -20 })).toBe(0.01));
 });
 
 describe("buildVariantUpdate", () => {
@@ -50,6 +70,16 @@ describe("buildVariantUpdate", () => {
   it("sets compareAt to original when discounting and toggle on", () => {
     const out = buildVariantUpdate(variant, { ...base, percent: -20, setCompareAtToOriginal: true });
     expect(out).toEqual({ id: variant.id, price: "80.00", compareAtPrice: "100.00" });
+  });
+
+  it("applies a fixed-amount discount with compare-at", () => {
+    const out = buildVariantUpdate(variant, {
+      ...base,
+      operation: "fixed",
+      amount: -25,
+      setCompareAtToOriginal: true,
+    });
+    expect(out).toEqual({ id: variant.id, price: "75.00", compareAtPrice: "100.00" });
   });
 
   it("does NOT set compareAt when price goes up", () => {

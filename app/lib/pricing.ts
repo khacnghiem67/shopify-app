@@ -1,6 +1,7 @@
 export type Rule = {
-  operation: "percentage";
-  percent: number;
+  operation: "percentage" | "fixed";
+  percent: number; // used when operation === "percentage" (e.g. -20 = -20%)
+  amount: number; // used when operation === "fixed" (added to price; negative = discount)
   roundTo99: boolean;
   setCompareAtToOriginal: boolean;
 };
@@ -27,6 +28,10 @@ export function applyPercentage(price: number, percent: number): number {
   return price * (1 + percent / 100);
 }
 
+export function applyFixedAmount(price: number, amount: number): number {
+  return price + amount;
+}
+
 export function roundTo99(price: number): number {
   return Math.floor(price) + 0.99;
 }
@@ -34,6 +39,7 @@ export function roundTo99(price: number): number {
 export function computeNewPrice(price: number, rule: Rule): number {
   let next = price;
   if (rule.operation === "percentage") next = applyPercentage(next, rule.percent);
+  else if (rule.operation === "fixed") next = applyFixedAmount(next, rule.amount);
   if (rule.roundTo99) next = roundTo99(next);
   if (next <= 0) next = MIN_PRICE;
   return next;

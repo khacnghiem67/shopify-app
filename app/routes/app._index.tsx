@@ -6,6 +6,7 @@ import {
   Card,
   IndexTable,
   TextField,
+  Select,
   Checkbox,
   Button,
   Banner,
@@ -137,7 +138,9 @@ export default function Index() {
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
 
+  const [operation, setOperation] = useState<"percentage" | "fixed">("percentage");
   const [percent, setPercent] = useState("-20");
+  const [amount, setAmount] = useState("-5");
   const [roundTo99, setRoundTo99] = useState(true);
   const [setCompareAt, setSetCompareAt] = useState(true);
   const [query, setQuery] = useState("");
@@ -157,8 +160,9 @@ export default function Index() {
   );
 
   const rule: Rule = {
-    operation: "percentage",
+    operation,
     percent: Number(percent) || 0,
+    amount: Number(amount) || 0,
     roundTo99,
     setCompareAtToOriginal: setCompareAt,
   };
@@ -198,13 +202,34 @@ export default function Index() {
               Pricing rule
             </Text>
             <InlineStack gap="400" align="start" blockAlign="center">
-              <TextField
-                label="Percentage change (%)"
-                type="number"
-                value={percent}
-                onChange={setPercent}
-                autoComplete="off"
+              <Select
+                label="Operation"
+                options={[
+                  { label: "Percentage change (%)", value: "percentage" },
+                  { label: "Fixed amount ($)", value: "fixed" },
+                ]}
+                value={operation}
+                onChange={(v) => setOperation(v as "percentage" | "fixed")}
               />
+              {operation === "percentage" ? (
+                <TextField
+                  label="Percentage change (%)"
+                  type="number"
+                  value={percent}
+                  onChange={setPercent}
+                  autoComplete="off"
+                  helpText="Negative = discount (e.g. -20)"
+                />
+              ) : (
+                <TextField
+                  label="Amount change ($)"
+                  type="number"
+                  value={amount}
+                  onChange={setAmount}
+                  autoComplete="off"
+                  helpText="Negative = discount (e.g. -5)"
+                />
+              )}
               <Checkbox
                 label="Round to .99"
                 checked={roundTo99}

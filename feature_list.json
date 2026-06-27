@@ -170,6 +170,28 @@
         "npm run typecheck -> 0 errors; npm run lint -> clean; npm run test -> 23/23 (18 pricing + 5 filter); npm run build -> success (2026-06-26)."
       ],
       "notes": "Filtering is client-side over the first 50 loaded products (matches the read scope). Pure logic kept framework-free for unit testing."
+    },
+    {
+      "id": "feat-009",
+      "priority": 9,
+      "area": "pricing-core",
+      "title": "Fixed-amount price rule (±$)",
+      "user_visible_behavior": "An Operation dropdown lets the merchant choose Percentage (%) or Fixed amount ($); the preview and Apply use the selected rule.",
+      "dependencies": [
+        "feat-002",
+        "feat-004"
+      ],
+      "status": "passing",
+      "verification": [
+        "Run `npm run test` — applyFixedAmount + fixed-path computeNewPrice/buildVariantUpdate tests green.",
+        "Run `npm run typecheck && npm run lint && npm run build` — all pass."
+      ],
+      "evidence": [
+        "pricing.ts: Rule gains operation \"percentage\"|\"fixed\" + amount; new pure applyFixedAmount(price,amount); computeNewPrice branches on operation then rounds/clamps. Added 6 tests (applyFixedAmount x2, computeNewPrice fixed x3, buildVariantUpdate fixed x1).",
+        "Route: Operation Select (Percentage/Fixed amount) + conditional amount TextField; rule wired through to preview + Apply (productVariantsBulkUpdate path unchanged, routes via computeNewPrice).",
+        "npm run typecheck -> 0 errors; npm run lint -> clean; npm run test -> 29/29 (24 pricing + 5 filter); npm run build -> success (2026-06-26)."
+      ],
+      "notes": "Apply/write path needed no change — it already computes via pricing.ts."
     }
   ]
 }
