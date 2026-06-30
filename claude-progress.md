@@ -9,9 +9,19 @@
 - Features passing: feat-001, 002, 003, 004, 007, 008 (search/filter), 009 (fixed-amount rule). feat-005 in_progress, feat-006 not_started.
 - Current highest-priority unfinished feature: **feat-005/006** — code complete & builds; only the **live store write demo + screenshots** remain (needs a Partner dev store).
 - Current blocker: none for offline work; live demo requires the user's dev store.
-- Runnability fix shipped: added `shopify.web.toml` (the clone lacked it) so `shopify app dev` serves the embedded app instead of the grey placeholder.
+- Remote: pushed to `submit` = https://github.com/khacnghiem67/shopify-app, branch `main`. Latest commit `ce24de6`. Local branch `feat/bulkprice-app` == remote `main`.
+- Runnability fix shipped: added `shopify.web.toml` (the clone lacked it) so `shopify app dev` serves the embedded app instead of the grey placeholder. `shopify.app.toml` is linked to the user's app "Du-demo" (client_id e349…), scope `write_products`.
+- Hooks/permissions are genuinely applied (committed): `.claude/settings.json` has a `permissions.allow` allowlist + a `PostToolUse(Edit|Write)` hook → `.claude/hooks/test-on-code-change.sh` (auto-runs Vitest when an `app/**.ts(x)` file changes; node-parsed, never blocks). May need `/hooks` reload to activate in a live session.
+- Presentation: `docs/presentation.html` = 12-slide **Vietnamese** deck built from `docs/PRESENTATION.md`, answering the 6 course questions (author: Bùi Đình Dự). Several plain-VN clarifications applied (guardrails, feature-status, test/build glosses); "khó khăn" reframed around working-with-AI.
 
 ## Session Log
+
+### Session 005 — Presentation + hooks/permissions (2026-06-26)
+- Created `docs/presentation.html` — 12-slide Vietnamese deck from PRESENTATION.md (title, mục tiêu, app làm gì, tính năng, Câu hỏi 2 knowledge ×2, AI hỗ trợ, kết quả, khó khăn, bài học, demo script, tổng kết). Author corrected to **Bùi Đình Dự**.
+- Iterated slide wording per user: knowledge table maps every keyword + a "tự dựng harness (file lõi)" row; Guardrails defined plainly; "khó khăn" reframed to AI-process (not logic bugs); feature-status rewritten with plain VN names (dropped 001/002 IDs); plain-VN glosses for typecheck/lint/test/build.
+- **Made hooks/permissions genuinely true** (was overclaimed): added committed `.claude/settings.json` permissions.allow + a PostToolUse test-on-change hook (`.claude/hooks/test-on-code-change.sh` + README), pipe-tested.
+- All committed + pushed to `submit`/main (through `ce24de6`). Working tree clean.
+- Remaining unchanged: feat-005/006 live store demo (needs the user's Partner dev store).
 
 ### Session 002 — Build BulkPrice (2026-06-25)
 

@@ -2,47 +2,42 @@
 
 ## Current Objective
 
-- Goal: Build the BulkPrice Shopify app (bulk product price editor) demonstrating the Harness methodology.
-- Current status: feat-001/002/003/004/007 **passing**; feat-005/006 code-complete & building, awaiting the live-store demo. `bash init.sh` → HARNESS GREEN.
-- Branch / commit: `feat/bulkprice-app` (pushed to remote `submit` = github.com/khacnghiem67/shopify-app, branch `main`).
-- The ONE remaining task: the live-store demo (feat-005/006) — needs a Partner dev store; produces the apply evidence + screenshots.
+- Goal: BulkPrice — a Shopify bulk price editor that demonstrates the Harness/AI methodology (course final project).
+- Current status: **app is feature-complete & verified offline.** feat-001/002/003/004/007/008/009 **passing**; feat-005 in_progress, feat-006 not_started (both need a live dev store). `bash init.sh` → HARNESS GREEN; **29/29 tests**.
+- Branch / commit: `feat/bulkprice-app` == remote `submit`/`main` (github.com/khacnghiem67/shopify-app), latest `ce24de6`. Working tree clean.
 
-## Completed This Session
+## The ONE remaining task (needs the user)
 
-- [x] feat-001: scaffolded official Shopify Remix app into repo, rewired harness, `bash init.sh` → HARNESS GREEN. Fixed `@shopify/shopify-api` version drift (pinned 13.1.0).
-- [x] feat-002: `app/lib/pricing.ts` pure pricing rules + Vitest (18/18), reviewed (spec ✅, quality approved) + hardened.
-- [x] Design spec + implementation plan + task briefs written under `docs/superpowers/` and `.superpowers/sdd/`.
+The live-store demo (feat-005/006) — requires a Shopify **Partner dev store**:
+1. `npm run dev` (the dev fix `shopify.web.toml` is in place; app loads embedded — NOT the grey placeholder).
+2. Select products → −20% → Apply → confirm new price + strikethrough compare-at in Shopify admin.
+3. Save before/after screenshots to `docs/demo/`, set feat-005/006 `passing` with that evidence, commit + push.
+
+## What exists now
+
+- **App:** official Shopify Remix template (Remix 2 + Polaris 12 + Prisma). Route `app/routes/app._index.tsx` = loader (Admin GraphQL `products` read) + Polaris UI (select, rule form, search, live preview) + action (`productVariantsBulkUpdate` write).
+- **Pure logic (tested):** `app/lib/pricing.ts` (percentage + fixed-amount + round-.99 + compare-at + money parse/format), `app/lib/filter.ts` (search). 29 Vitest tests.
+- **Harness:** `AGENTS.md`/`CLAUDE.md`, `init.sh`, `feature_list.json`, `claude-progress.md`, this file, `docs/PRODUCT.md` + `docs/ARCHITECTURE.md`. Spec + plan + task briefs under `docs/superpowers/` and `.superpowers/sdd/`.
+- **Hooks/permissions (committed):** `.claude/settings.json` allowlist + `PostToolUse` hook `.claude/hooks/test-on-code-change.sh` (auto-runs Vitest on `app/**.ts(x)` edits).
+- **Presentation:** `docs/PRESENTATION.md` (English, 6 answers) + `docs/presentation.html` (12-slide **Vietnamese** deck, author Bùi Đình Dự). Submission: repo link + presentation.html + PRESENTATION.md.
 
 ## Verification Evidence
 
-| Check | Command | Result | Notes |
-|---|---|---|---|
-| Full chain | `bash init.sh` | HARNESS GREEN | typecheck + lint + test + build pass |
-| Pricing tests | `npx vitest run app/lib/pricing.test.ts` | 18/18 passing | pure-function unit tests |
-| Typecheck | `npm run typecheck` | 0 errors | |
+| Check | Command | Result |
+|---|---|---|
+| Full chain | `bash init.sh` | HARNESS GREEN |
+| Tests | `npm run test` | 29/29 passing |
+| Typecheck / lint / build | `npm run typecheck` · `lint` · `build` | clean / clean / ok |
 
-## Files Changed
-
-- App scaffold (`app/`, `prisma/`, `package.json`, configs), `init.sh`, `AGENTS.md`, `feature_list.json`, `docs/PRODUCT.md`, `docs/ARCHITECTURE.md`, `app/lib/pricing.ts(+test)`.
-
-## Decisions Made
-
-- Used a **git clone** of the official template (not `create-app`, which needs interactive Partner-org selection).
-- Pinned `@shopify/shopify-api` to 13.1.0 via overrides (dedup fix).
-- Committed `package-lock.json` for reproducibility.
-- Tasks 3–5 all edit `app/routes/app._index.tsx`; recommend building them as one cohesive route task.
+> Note: running `bash init.sh` while `npm run dev` is active can EPERM at `prisma generate` (dev holds the engine DLL). Stop dev first, or run the four checks directly.
 
 ## Blockers / Risks
 
-- Live store path (`npm run dev`) needs a Partner dev store + the app linked (`npm run config:link`) — manual demo step, not required for `init.sh` green.
+- Live store demo needs a Partner dev store + linked app (already linked: "Du-demo", scope `write_products`).
 - `npm audit` shows template-inherited vulnerabilities (out of scope for the demo).
 
 ## Next Session Startup
 
-1. Read `AGENTS.md`, then `feature_list.json` + `claude-progress.md`.
-2. Run `bash init.sh` (expect HARNESS GREEN).
-3. Resume at **feat-003** (products loader). Briefs are in `.superpowers/sdd/task-3-brief.md` (and 4, 5). Plan: `docs/superpowers/plans/2026-06-25-bulkprice-shopify-app.md`.
-
-## Recommended Next Step
-
-- Build the bulk-price-editor route (loader + Polaris UI + Apply action) in `app/routes/app._index.tsx` using the validated GraphQL ops in `docs/ARCHITECTURE.md`, verify with `npm run typecheck && npm run build`, then do the live store demo for feat-005 evidence.
+1. Read `AGENTS.md`, then `feature_list.json` + `claude-progress.md` + this file.
+2. `bash init.sh` (expect HARNESS GREEN) — stop any `npm run dev` first.
+3. If continuing: either do the live-store demo (feat-005/006) or keep polishing `docs/presentation.html`. Optional: final whole-branch code review of the route.
